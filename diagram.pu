@@ -1,0 +1,281 @@
+@startuml
+' Skinparam melhora a aparência do diagrama
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "Segoe UI"
+skinparam roundcorner 10
+hide empty members
+
+' --- Definição das Classes Base (Cadastros) ---
+
+class Pessoa {
+  - nome: str
+  - celular: str
+  - identificacao: str
+  - idade: int
+  --
+  + __init__(nome: str, celular: str, identificacao: str, idade: int)
+  + get_nome(): str
+  + set_nome(nome: str): void
+  + get_celular(): str
+  + set_celular(celular: str): void
+  + get_identificacao(): str
+  + set_identificacao(identificacao: str): void
+  + get_idade(): int
+  + set_idade(idade: int): void
+  + pode_participar_viagem(): bool
+}
+
+class Pais {
+  - nome: str
+  - cidades: list[Cidade]
+  --
+  + __init__(nome: str)
+  + get_nome(): str
+  + set_nome(nome: str): void
+  + incluir_cidade(cidade: Cidade): void
+  + excluir_cidade(cidade: Cidade): void
+}
+
+class Cidade {
+  - nome: str
+  - pais: Pais
+  --
+  + __init__(nome: str, pais: Pais)
+  + get_nome(): str
+  + set_nome(nome: str): void
+  + get_pais(): Pais
+  + set_pais(pais: Pais): void
+}
+
+class EmpresaTransporte {
+  - nome: str
+  - cnpj: str
+  - telefone: str
+  --
+  + __init__(nome, cnpj, telefone)
+  + get_nome(): str
+  + set_nome(nome: str): void
+  + get_cnpj(): str
+  + set_cnpj(cnpj: str): void
+  + get_telefone(): str
+  + set_telefone(telefone: str): void
+}
+
+' Enum para os tipos de transporte
+enum TipoTransporte {
+  AVIAO
+  CARRO
+  TREM
+  ONIBUS
+}
+
+class MeioTransporte {
+  - tipo: TipoTransporte
+  - empresa: EmpresaTransporte
+  --
+  + __init__(tipo: TipoTransporte, empresa: EmpresaTransporte)
+  + get_tipo(): TipoTransporte
+  + set_tipo(tipo: TipoTransporte): void
+  + get_empresa(): EmpresaTransporte
+  + set_empresa(empresa: EmpresaTransporte): void
+}
+
+
+' --- Definição da Classe Central (Viagem) e suas Partes ---
+
+class Viagem {
+  - data_inicio: date
+  - data_fim: date
+  - valor_total_pacote: float
+  - participantes: list[Pessoa]
+  - destinos_visitados: list[Cidade]
+  - itinerarios: list[ItinerarioViagem]
+  - trechos: list[TrechoViagem]
+  - pagamentos_recebidos: list[Pagamento]
+  - passagens_compradas: list[Passagem]
+  --
+  + __init__(inicio, fim, valor_total)
+  + get_data_inicio(): date
+  + set_data_inicio(data: date): void
+  + get_data_fim(): date
+  + set_data_fim(data: date): void
+  + get_valor_total_pacote(): float
+  + set_valor_total_pacote(valor: float): void
+  --
+  + incluir_participante(p: Pessoa): void
+  + excluir_participante(p: Pessoa): void
+  + incluir_destino(c: Cidade): void
+  + excluir_destino(c: Cidade): void
+  + incluir_itinerario(i: ItinerarioViagem): void
+  + excluir_itinerario(i: ItinerarioViagem): void
+  + incluir_trecho(t: TrechoViagem): void
+  + excluir_trecho(t: TrechoViagem): void
+  + incluir_pagamento(p: Pagamento): void
+  + excluir_pagamento(p: Pagamento): void
+  + incluir_passagem(p: Passagem): void
+  + excluir_passagem(p: Passagem): void
+  --
+  + get_valor_total_pago(): float
+  + get_valor_restante(): float
+  + get_valor_pago_por_pessoa(pessoa: Pessoa): float
+  + get_valor_restante_por_pessoa(pessoa: Pessoa): float
+  + get_pessoas_com_pagamento_completo(): list[Pessoa]
+  + get_pessoas_com_pagamento_pendente(): list[Pessoa]
+  + pode_iniciar_viagem(): bool
+  + validar_viagem(): bool
+}
+
+class ItinerarioViagem {
+  - data: date
+  - passeios: list[PasseioTuristico]
+  --
+  + __init__(data: date)
+  + get_data(): date
+  + set_data(data: date): void
+  + incluir_passeio(p: PasseioTuristico): void
+  + excluir_passeio(p: PasseioTuristico): void
+}
+
+class PasseioTuristico {
+  - atracao_turistica: str
+  - horario_inicio: time
+  - horario_fim: time
+  - valor: float
+  - cidade: Cidade
+  - participantes_passeio: list[Pessoa]
+  --
+  + __init__(atracao: str, inicio: time, fim: time, valor: float, cidade: Cidade)
+  + get_atracao_turistica(): str
+  + set_atracao_turistica(atracao: str): void
+  + get_horario_inicio(): time
+  + set_horario_inicio(inicio: time): void
+  + get_horario_fim(): time
+  + set_horario_fim(fim: time): void
+  + get_valor(): float
+  + set_valor(valor: float): void
+  + get_cidade(): Cidade
+  + set_cidade(cidade: Cidade): void
+  + incluir_participante(p: Pessoa): void
+  + excluir_participante(p: Pessoa): void
+}
+
+class TrechoViagem {
+  - data: datetime
+  - local_origem: str
+  - local_destino: str
+  - meio_transporte: MeioTransporte
+  --
+  + __init__(data: datetime, origem: str, destino: str, transporte: MeioTransporte)
+  + get_data(): datetime
+  + set_data(data: datetime): void
+  + get_local_origem(): str
+  + set_local_origem(origem: str): void
+  + get_local_destino(): str
+  + set_local_destino(destino: str): void
+  + get_meio_transporte(): MeioTransporte
+  + set_meio_transporte(m: MeioTransporte): void
+}
+
+' --- Classe de Associação (Passagem) ---
+
+class Passagem {
+  - compra_efetuada: bool
+  - passageiro: Pessoa
+  - trecho: TrechoViagem
+  - responsavel_compra: Pessoa
+  --
+  + __init__(passageiro: Pessoa, trecho: TrechoViagem, responsavel: Pessoa)
+  + is_compra_efetuada(): bool
+  + set_compra_efetuada(status: bool): void
+  + get_passageiro(): Pessoa
+  + set_passageiro(p: Pessoa): void
+  + get_trecho(): TrechoViagem
+  + set_trecho(t: TrechoViagem): void
+  + get_responsavel_compra(): Pessoa
+  + set_responsavel_compra(p: Pessoa): void
+}
+
+
+' --- Definição da Hierarquia de Pagamentos (Herança) ---
+
+abstract class Pagamento {
+  - data: date
+  - valor_pago: float
+  - pagador: Pessoa
+  - viagem: Viagem
+  --
+  + __init__(data: date, valor: float, pagador: Pessoa, viagem: Viagem)
+  + get_data(): date
+  + set_data(data: date): void
+  + get_valor_pago(): float
+  + set_valor_pago(valor: float): void
+  + get_pagador(): Pessoa
+  + set_pagador(p: Pessoa): void
+  + get_viagem(): Viagem
+  + set_viagem(v: Viagem): void
+}
+
+class PagamentoDinheiro {
+  + __init__(data: date, valor: float, pagador: Pessoa, viagem: Viagem)
+}
+
+class PagamentoPix {
+  - cpf_pagador: str
+  --
+  + __init__(data: date, valor: float, pagador: Pessoa, viagem: Viagem, cpf: str)
+  + get_cpf_pagador(): str
+  + set_cpf_pagador(cpf: str): void
+}
+
+class PagamentoCartao {
+  - numero_cartao: str
+  - bandeira: str
+  --
+  + __init__(data: date, valor: float, pagador: Pessoa, viagem: Viagem, numero: str, bandeira: str)
+  + get_numero_cartao(): str
+  + set_numero_cartao(numero: str): void
+  + get_bandeira(): str
+  + set_bandeira(bandeira: str): void
+}
+
+' --- RELACIONAMENTOS ---
+
+' Herança
+Pagamento <|-- PagamentoDinheiro
+Pagamento <|-- PagamentoPix
+Pagamento <|-- PagamentoCartao
+
+' --- Agregações e Composições (com nomes de atributos) ---
+
+Viagem o-- "1..*" Pessoa : - participantes
+Viagem *-- "1..*" ItinerarioViagem : - itinerarios
+Viagem *-- "1..*" TrechoViagem : - trechos
+Viagem o-- "0..*" Pagamento : - pagamentos_recebidos
+Viagem o-- "0..*" Passagem : - passagens_compradas
+
+ItinerarioViagem *-- "0..*" PasseioTuristico : - passeios
+Pais *-- "1..*" Cidade : - cidades
+
+' --- Associações (com nomes de atributos) ---
+
+' Relações de Pagamento (já estão dentro da classe Pagamento como atributos)
+Pagamento --> "1" Pessoa : - pagador
+Pagamento --> "1" Viagem : - viagem
+
+' Relações de Destino
+Viagem ..> "1..*" Cidade : - destinos_visitados
+PasseioTuristico --> "1" Cidade : - cidade
+
+' Relações de Logística
+MeioTransporte --> "1" EmpresaTransporte : - empresa
+TrechoViagem --> "1" MeioTransporte : - meio_transporte
+
+' Relações do Passeio
+PasseioTuristico ..> "1..*" Pessoa : - participantes_passeio
+
+' Relações da Passagem (já estão dentro da classe Passagem)
+Passagem --> "1" Pessoa : - passageiro
+Passagem --> "1" TrechoViagem : - trecho
+Passagem --> "1" Pessoa : - responsavel_compra
+
+@enduml
