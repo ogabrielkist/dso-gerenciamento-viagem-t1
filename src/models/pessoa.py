@@ -1,8 +1,4 @@
-from datetime import date
-
-
 class Pessoa:
-
     def __init__(self, nome: str, celular: str, identificacao: str, idade: int):
         if not isinstance(nome, str):
             raise TypeError("nome deve ser uma string")
