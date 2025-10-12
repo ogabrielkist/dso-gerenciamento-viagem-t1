@@ -1,0 +1,2 @@
+class PessoaJaCadastradaException(Exception):
+    pass

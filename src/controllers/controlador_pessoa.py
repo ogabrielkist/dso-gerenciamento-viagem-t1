@@ -1,4 +1,10 @@
 from models import Pessoa
+from models.exceptions import (
+    PessoaJaCadastradaException,
+    PessoaNaoEncontradaException,
+    ListaVaziaException,
+    OpcaoInvalidaException,
+)
 from views import TelaPessoa
 
 
@@ -9,80 +15,94 @@ class ControladorPessoa:
         self.__participantes = []
 
     def incluir_pessoa(self):
-        dados_pessoa = self.__tela_pessoa.pega_dados_pessoa()
+        try:
+            dados_pessoa = self.__tela_pessoa.pega_dados_pessoa()
 
-        for participante in self.__participantes:
-            if participante.identificacao() == dados_pessoa["identificacao"]:
-                self.__tela_pessoa.mostra_mensagem(
-                    "ERRO: Pessoa com essa identificação já cadastrada."
-                )
-                return
+            for participante in self.__participantes:
+                if participante.identificacao() == dados_pessoa["identificacao"]:
+                    raise PessoaJaCadastradaException(
+                        "Pessoa com essa identificação já cadastrada."
+                    )
 
-        pessoa = Pessoa(
-            dados_pessoa["nome"],
-            dados_pessoa["celular"],
-            dados_pessoa["identificacao"],
-            dados_pessoa["idade"],
-        )
+            pessoa = Pessoa(
+                dados_pessoa["nome"],
+                dados_pessoa["celular"],
+                dados_pessoa["identificacao"],
+                dados_pessoa["idade"],
+            )
 
-        self.__participantes.append(pessoa)
-        self.__tela_pessoa.mostra_mensagem("Pessoa incluída com sucesso!")
+            self.__participantes.append(pessoa)
+            self.__tela_pessoa.mostra_mensagem("Pessoa incluída com sucesso!")
+
+        except PessoaJaCadastradaException as e:
+            self.__tela_pessoa.mostra_mensagem(f"ERRO: {e}")
 
     def listar_pessoas(self):
-        if not self.__participantes:
-            self.__tela_pessoa.mostra_mensagem("Nenhuma pessoa cadastrada.")
-            return
+        try:
+            if not self.__participantes:
+                raise ListaVaziaException("Nenhuma pessoa cadastrada.")
 
-        for pessoa in self.__participantes:
-            dados_pessoa = {
-                "nome": pessoa.nome,
-                "celular": pessoa.celular,
-                "identificacao": pessoa.identificacao,
-                "idade": pessoa.idade,
-            }
+            for pessoa in self.__participantes:
+                dados_pessoa = {
+                    "nome": pessoa.nome,
+                    "celular": pessoa.celular,
+                    "identificacao": pessoa.identificacao,
+                    "idade": pessoa.idade,
+                }
 
-            self.__tela_pessoa.mostra_pessoa(dados_pessoa)
+                self.__tela_pessoa.mostra_pessoa(dados_pessoa)
+
+        except ListaVaziaException as e:
+            self.__tela_pessoa.mostra_mensagem(str(e))
 
     def excluir_pessoa(self):
-        self.listar_pessoas()
-        if not self.__participantes:
-            return
+        try:
+            self.listar_pessoas()
+            if not self.__participantes:
+                return
 
-        identificacao = self.__tela_pessoa.seleciona_pessoa()
+            identificacao = self.__tela_pessoa.seleciona_pessoa()
 
-        pessoa_encontrada = None
-        for pessoa in self.__participantes:
-            if pessoa.identificacao == identificacao:
-                pessoa_encontrada = pessoa
-                break
+            pessoa_encontrada = None
+            for pessoa in self.__participantes:
+                if pessoa.identificacao == identificacao:
+                    pessoa_encontrada = pessoa
+                    break
 
-        if pessoa_encontrada:
+            if not pessoa_encontrada:
+                raise PessoaNaoEncontradaException("Pessoa não encontrada.")
+
             self.__participantes.remove(pessoa_encontrada)
             self.__tela_pessoa.mostra_mensagem("Pessoa removida com sucesso!")
-        else:
-            self.__tela_pessoa.mostra_mensagem("ERRO: Pessoa não encontrada.")
+
+        except PessoaNaoEncontradaException as e:
+            self.__tela_pessoa.mostra_mensagem(f"ERRO: {e}")
 
     def editar_pessoa(self):
-        self.listar_pessoas()
-        if not self.__participantes:
-            return
+        try:
+            self.listar_pessoas()
+            if not self.__participantes:
+                return
 
-        identificacao = self.__tela_pessoa.seleciona_pessoa()
-        pessoa_encontrada = None
-        for pessoa in self.__participantes:
-            if pessoa.identificacao == identificacao:
-                pessoa_encontrada = pessoa
-                break
+            identificacao = self.__tela_pessoa.seleciona_pessoa()
+            pessoa_encontrada = None
+            for pessoa in self.__participantes:
+                if pessoa.identificacao == identificacao:
+                    pessoa_encontrada = pessoa
+                    break
 
-        if pessoa_encontrada:
+            if not pessoa_encontrada:
+                raise PessoaNaoEncontradaException("Pessoa não encontrada.")
+
             dados_pessoa = self.__tela_pessoa.pega_dados_pessoa()
             pessoa_encontrada.nome = dados_pessoa["nome"]
             pessoa_encontrada.celular = dados_pessoa["celular"]
             pessoa_encontrada.identificacao = dados_pessoa["identificacao"]
             pessoa_encontrada.idade = dados_pessoa["idade"]
             self.__tela_pessoa.mostra_mensagem("Pessoa editada com sucesso!")
-        else:
-            self.__tela_pessoa.mostra_mensagem("ERRO: Pessoa não encontrada.")
+
+        except PessoaNaoEncontradaException as e:
+            self.__tela_pessoa.mostra_mensagem(f"ERRO: {e}")
 
     def retornar(self):
         self.__controlador_principal.abre_tela()
@@ -96,10 +116,14 @@ class ControladorPessoa:
         }
 
         while True:
-            opcao_escolhida = self.__tela_pessoa.tela_opcoes()
+            try:
+                opcao_escolhida = self.__tela_pessoa.tela_opcoes()
 
-            funcao_escolhida = lista_opcoes.get(opcao_escolhida)
-            if funcao_escolhida:
+                funcao_escolhida = lista_opcoes.get(opcao_escolhida)
+                if not funcao_escolhida:
+                    raise OpcaoInvalidaException("Opção inválida!")
+
                 funcao_escolhida()
-            else:
-                self.__tela_pessoa.mostra_mensagem("Opção inválida!")
+
+            except OpcaoInvalidaException as e:
+                self.__tela_pessoa.mostra_mensagem(str(e))

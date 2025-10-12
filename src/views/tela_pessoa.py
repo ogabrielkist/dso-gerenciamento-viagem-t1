@@ -3,7 +3,6 @@ import os
 
 class TelaPessoa:
     def tela_opcoes(self):
-        os.system("clear")
         print("\n-------- PESSOAS --------")
         print("Escolha a opção")
         print("1 - Incluir")

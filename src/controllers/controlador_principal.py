@@ -1,4 +1,5 @@
 from controllers import ControladorPessoa
+from models.exceptions import OpcaoInvalidaException
 
 
 class ControladorPrincipal:
@@ -10,7 +11,7 @@ class ControladorPrincipal:
 
     def cadastra_pessoa(self):
         self.__ctrl_pessoa.abre_tela()
-    
+
     def cadastra_viagem(self):
         print("Funcionalidade de Viagens ainda não implementada.")
 
@@ -21,18 +22,22 @@ class ControladorPrincipal:
         lista_opcoes = {
             1: self.cadastra_pessoa,
             2: self.cadastra_viagem,
-            0: self.encerra_sistema
+            0: self.encerra_sistema,
         }
 
         while True:
-            print("\n-------- SISTEMA DE VIAGENS --------")
-            print("Escolha sua opção")
-            print("1 - Gerenciar Pessoas")
-            print("0 - Sair")
-            
-            opcao = int(input("Digite a opção: "))
-            funcao_escolhida = lista_opcoes.get(opcao)
-            if funcao_escolhida:
+            try:
+                print("\n-------- SISTEMA DE VIAGENS --------")
+                print("Escolha sua opção")
+                print("1 - Gerenciar Pessoas")
+                print("0 - Sair")
+
+                opcao = int(input("Digite a opção: "))
+                funcao_escolhida = lista_opcoes.get(opcao)
+                if not funcao_escolhida:
+                    raise OpcaoInvalidaException("Opção inválida!")
+
                 funcao_escolhida()
-            else:
-                print("Opção inválida!")
+
+            except OpcaoInvalidaException as e:
+                print(str(e))

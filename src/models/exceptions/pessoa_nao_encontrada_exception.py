@@ -1,0 +1,2 @@
+class PessoaNaoEncontradaException(Exception):
+    pass
