@@ -62,6 +62,28 @@ class ControladorPessoa:
         else:
             self.__tela_pessoa.mostra_mensagem("ERRO: Pessoa não encontrada.")
 
+    def editar_pessoa(self):
+        self.listar_pessoas()
+        if not self.__participantes:
+            return
+
+        identificacao = self.__tela_pessoa.seleciona_pessoa()
+        pessoa_encontrada = None
+        for pessoa in self.__participantes:
+            if pessoa.identificacao == identificacao:
+                pessoa_encontrada = pessoa
+                break
+
+        if pessoa_encontrada:
+            dados_pessoa = self.__tela_pessoa.pega_dados_pessoa()
+            pessoa_encontrada.nome = dados_pessoa["nome"]
+            pessoa_encontrada.celular = dados_pessoa["celular"]
+            pessoa_encontrada.identificacao = dados_pessoa["identificacao"]
+            pessoa_encontrada.idade = dados_pessoa["idade"]
+            self.__tela_pessoa.mostra_mensagem("Pessoa editada com sucesso!")
+        else:
+            self.__tela_pessoa.mostra_mensagem("ERRO: Pessoa não encontrada.")
+
     def retornar(self):
         self.__controlador_principal.abre_tela()
 
