@@ -1,3 +1,4 @@
+import uuid
 from enum import Enum
 from models.empresa_transporte import EmpresaTransporte
 
@@ -11,14 +12,21 @@ class TipoTransporte(Enum):
 
 class MeioTransporte:
 
-    def __init__(self, tipo: TipoTransporte, empresa: EmpresaTransporte):
+    def __init__(
+        self, tipo: TipoTransporte, empresa: EmpresaTransporte, id: str = None
+    ):
         if not isinstance(tipo, TipoTransporte):
             raise TypeError("tipo deve ser uma instância de TipoTransporte")
         if not isinstance(empresa, EmpresaTransporte):
             raise TypeError("empresa deve ser uma instância de EmpresaTransporte")
 
+        self.__id = id if id else str(uuid.uuid4())
         self.__tipo = tipo
         self.__empresa = empresa
+
+    @property
+    def id(self) -> str:
+        return self.__id
 
     @property
     def tipo(self) -> TipoTransporte:

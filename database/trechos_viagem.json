@@ -1,0 +1,16 @@
+[
+  {
+    "id": "a50e8400-e29b-41d4-a716-446655440001",
+    "data": "2025-12-12T08:00:00",
+    "local_origem": "Florianópolis",
+    "local_destino": "São Paulo",
+    "meio_transporte_id": "850e8400-e29b-41d4-a716-446655440001"
+  },
+  {
+    "id": "a50e8400-e29b-41d4-a716-446655440002",
+    "data": "2025-12-18T18:00:00",
+    "local_origem": "São Paulo",
+    "local_destino": "Florianópolis",
+    "meio_transporte_id": "850e8400-e29b-41d4-a716-446655440001"
+  }
+]

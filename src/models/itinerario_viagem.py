@@ -1,14 +1,20 @@
+import uuid
 from datetime import date
 from models.passeio_turistico import PasseioTuristico
 
 
 class ItinerarioViagem:
 
-    def __init__(self, data: date):
+    def __init__(self, data: date, id: str = None):
         if not isinstance(data, date):
             raise TypeError("data deve ser uma instância de date")
+        self.__id = id if id else str(uuid.uuid4())
         self.__data = data
         self.__passeios = []
+
+    @property
+    def id(self) -> str:
+        return self.__id
 
     @property
     def data(self) -> date:

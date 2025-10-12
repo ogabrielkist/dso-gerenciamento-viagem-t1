@@ -1,10 +1,17 @@
+import uuid
 from models.pessoa import Pessoa
 from models.trecho_viagem import TrechoViagem
 
 
 class Passagem:
 
-    def __init__(self, passageiro: Pessoa, trecho: TrechoViagem, responsavel: Pessoa):
+    def __init__(
+        self,
+        passageiro: Pessoa,
+        trecho: TrechoViagem,
+        responsavel: Pessoa,
+        id: str = None,
+    ):
         if not isinstance(passageiro, Pessoa):
             raise TypeError("passageiro deve ser uma instância de Pessoa")
         if not isinstance(trecho, TrechoViagem):
@@ -12,10 +19,15 @@ class Passagem:
         if not isinstance(responsavel, Pessoa):
             raise TypeError("responsavel deve ser uma instância de Pessoa")
 
+        self.__id = id if id else str(uuid.uuid4())
         self.__compra_efetuada = False
         self.__passageiro = passageiro
         self.__trecho = trecho
         self.__responsavel_compra = responsavel
+
+    @property
+    def id(self) -> str:
+        return self.__id
 
     @property
     def compra_efetuada(self) -> bool:

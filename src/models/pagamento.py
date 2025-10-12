@@ -1,3 +1,4 @@
+import uuid
 from abc import ABC, abstractmethod
 from datetime import date
 from models.pessoa import Pessoa
@@ -5,7 +6,9 @@ from models.pessoa import Pessoa
 
 class Pagamento(ABC):
 
-    def __init__(self, data: date, valor: float, pagador: Pessoa, viagem):
+    def __init__(
+        self, data: date, valor: float, pagador: Pessoa, viagem, id: str = None
+    ):
         from models.viagem import Viagem
 
         if not isinstance(data, date):
@@ -19,10 +22,15 @@ class Pagamento(ABC):
         if not isinstance(viagem, Viagem):
             raise TypeError("viagem deve ser uma instância de Viagem")
 
+        self.__id = id if id else str(uuid.uuid4())
         self.__data = data
         self.__valor_pago = valor
         self.__pagador = pagador
         self.__viagem = viagem
+
+    @property
+    def id(self) -> str:
+        return self.__id
 
     @property
     def data(self) -> date:
@@ -74,8 +82,10 @@ class Pagamento(ABC):
 
 class PagamentoDinheiro(Pagamento):
 
-    def __init__(self, data: date, valor: float, pagador: Pessoa, viagem):
-        super().__init__(data, valor, pagador, viagem)
+    def __init__(
+        self, data: date, valor: float, pagador: Pessoa, viagem, id: str = None
+    ):
+        super().__init__(data, valor, pagador, viagem, id)
 
     def __str__(self) -> str:
         return f"PagamentoDinheiro(data={self.data}, valor=R$ {self.valor_pago:.2f}, pagador='{self.pagador.nome}')"
@@ -83,8 +93,16 @@ class PagamentoDinheiro(Pagamento):
 
 class PagamentoPix(Pagamento):
 
-    def __init__(self, data: date, valor: float, pagador: Pessoa, viagem, cpf: str):
-        super().__init__(data, valor, pagador, viagem)
+    def __init__(
+        self,
+        data: date,
+        valor: float,
+        pagador: Pessoa,
+        viagem,
+        cpf: str,
+        id: str = None,
+    ):
+        super().__init__(data, valor, pagador, viagem, id)
         if not isinstance(cpf, str):
             raise TypeError("cpf deve ser uma string")
         self.__cpf_pagador = cpf
@@ -113,8 +131,9 @@ class PagamentoCartao(Pagamento):
         viagem,
         numero: str,
         bandeira: str,
+        id: str = None,
     ):
-        super().__init__(data, valor, pagador, viagem)
+        super().__init__(data, valor, pagador, viagem, id)
         if not isinstance(numero, str):
             raise TypeError("numero deve ser uma string")
         if not isinstance(bandeira, str):

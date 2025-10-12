@@ -1,3 +1,4 @@
+import uuid
 from datetime import time
 from models.cidade import Cidade
 from models.pessoa import Pessoa
@@ -6,7 +7,13 @@ from models.pessoa import Pessoa
 class PasseioTuristico:
 
     def __init__(
-        self, atracao: str, inicio: time, fim: time, valor: float, cidade: Cidade
+        self,
+        atracao: str,
+        inicio: time,
+        fim: time,
+        valor: float,
+        cidade: Cidade,
+        id: str = None,
     ):
         if not isinstance(atracao, str):
             raise TypeError("atracao deve ser uma string")
@@ -21,12 +28,17 @@ class PasseioTuristico:
         if not isinstance(cidade, Cidade):
             raise TypeError("cidade deve ser uma instância de Cidade")
 
+        self.__id = id if id else str(uuid.uuid4())
         self.__atracao_turistica = atracao
         self.__horario_inicio = inicio
         self.__horario_fim = fim
         self.__valor = valor
         self.__cidade = cidade
         self.__participantes_passeio = []
+
+    @property
+    def id(self) -> str:
+        return self.__id
 
     @property
     def atracao_turistica(self) -> str:

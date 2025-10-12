@@ -1,14 +1,20 @@
+import uuid
 from models.pais import Pais
 
 
 class Cidade:
 
-    def __init__(self, nome: str, pais: Pais):
+    def __init__(self, nome: str, pais: Pais, id: str = None):
         if not isinstance(pais, Pais):
             raise TypeError("pais deve ser uma instância de Pais")
+        self.__id = id if id else str(uuid.uuid4())
         self.__nome = nome
         self.__pais = pais
         pais.incluir_cidade(self)
+
+    @property
+    def id(self) -> str:
+        return self.__id
 
     @property
     def nome(self) -> str:

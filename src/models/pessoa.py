@@ -1,5 +1,10 @@
+import uuid
+
+
 class Pessoa:
-    def __init__(self, nome: str, celular: str, identificacao: str, idade: int):
+    def __init__(
+        self, nome: str, celular: str, identificacao: str, idade: int, id: str = None
+    ):
         if not isinstance(nome, str):
             raise TypeError("nome deve ser uma string")
         if not isinstance(celular, str):
@@ -11,10 +16,15 @@ class Pessoa:
         if idade < 0:
             raise ValueError("idade não pode ser negativa")
 
+        self.__id = id if id else str(uuid.uuid4())
         self.__nome = nome
         self.__celular = celular
         self.__identificacao = identificacao
         self.__idade = idade
+
+    @property
+    def id(self) -> str:
+        return self.__id
 
     @property
     def nome(self) -> str:

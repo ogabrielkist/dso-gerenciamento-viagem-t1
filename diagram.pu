@@ -6,39 +6,355 @@ skinparam roundcorner 10
 hide empty members
 
 package "Controller" <<Frame>> {
+  abstract class ControladorBase {
+    # __controlador_principal: ControladorPrincipal
+    # _entidades: list
+    # _tela: TelaBase
+    # _mapa_opcoes: dict
+    --
+    + incluir(): void
+    + listar(): void
+    + excluir(): void
+    + editar(): void
+    + retornar(): void
+    + abre_tela(): void
+    # {abstract} _criar_entidade(dados): Entity
+    # {abstract} _atualizar_entidade(entidade, dados): void
+    # {abstract} _entidade_para_dict(entidade): dict
+    # {abstract} _obter_identificador(entidade): str
+  }
+
   class ControladorPrincipal {
     - __ctrl_pessoa: ControladorPessoa
+    - __ctrl_pais: ControladorPais
+    - __ctrl_cidade: ControladorCidade
+    - __ctrl_empresa: ControladorEmpresaTransporte
+    - __ctrl_meio_transporte: ControladorMeioTransporte
+    - __ctrl_viagem: ControladorViagem
+    - __ctrl_trecho: ControladorTrechoViagem
+    - __ctrl_passeio: ControladorPasseioTuristico
+    - __ctrl_passagem: ControladorPassagem
+    - __ctrl_pagamento: ControladorPagamento
+    - __ctrl_itinerario: ControladorItinerarioViagem
     --
     + inicia_sistema(): void
     + cadastra_pessoa(): void
+    + cadastra_pais(): void
+    + cadastra_cidade(): void
+    + cadastra_empresa_transporte(): void
+    + cadastra_meio_transporte(): void
+    + cadastra_viagem(): void
+    + cadastra_trecho_viagem(): void
+    + cadastra_passeio_turistico(): void
+    + cadastra_passagem(): void
+    + cadastra_pagamento(): void
+    + cadastra_itinerario_viagem(): void
+    + relatorios(): void
     + encerra_sistema(): void
     + abre_tela(): void
   }
 
   class ControladorPessoa {
-    - __controlador_principal: ControladorPrincipal
-    - __participantes: list[Pessoa]
-    - __tela_pessoa: TelaPessoa
+    - _dao: DAOPessoa
     --
-    + incluir_pessoa(): void
-    + listar_pessoas(): void
-    + excluir_pessoa(): void
-    + retornar(): void
-    + abre_tela(): void
+    + _criar_entidade(dados): Pessoa
+    + _atualizar_entidade(pessoa, dados): void
+    + _entidade_para_dict(pessoa): dict
+    + _obter_identificador(pessoa): str
+  }
+
+  class ControladorPais {
+    - _dao: DAOPais
+    --
+    + _criar_entidade(dados): Pais
+    + _atualizar_entidade(pais, dados): void
+    + _entidade_para_dict(pais): dict
+    + _obter_identificador(pais): str
+  }
+
+  class ControladorCidade {
+    - _dao: DAOCidade
+    --
+    + _criar_entidade(dados): Cidade
+    + _atualizar_entidade(cidade, dados): void
+    + _entidade_para_dict(cidade): dict
+    + _obter_identificador(cidade): str
+  }
+
+  class ControladorEmpresaTransporte {
+    - _dao: DAOEmpresaTransporte
+    --
+    + _criar_entidade(dados): EmpresaTransporte
+    + _atualizar_entidade(empresa, dados): void
+    + _entidade_para_dict(empresa): dict
+    + _obter_identificador(empresa): str
+  }
+
+  class ControladorMeioTransporte {
+    - _dao: DAOMeioTransporte
+    --
+    + _criar_entidade(dados): MeioTransporte
+    + _atualizar_entidade(meio, dados): void
+    + _entidade_para_dict(meio): dict
+    + _obter_identificador(meio): str
+  }
+
+  class ControladorViagem {
+    - _dao: DAOViagem
+    --
+    + _criar_entidade(dados): Viagem
+    + _atualizar_entidade(viagem, dados): void
+    + _entidade_para_dict(viagem): dict
+    + _obter_identificador(viagem): str
+  }
+
+  class ControladorTrechoViagem {
+    - _dao: DAOTrechoViagem
+    --
+    + _criar_entidade(dados): TrechoViagem
+    + _atualizar_entidade(trecho, dados): void
+    + _entidade_para_dict(trecho): dict
+  }
+
+  class ControladorPasseioTuristico {
+    - _dao: DAOPasseioTuristico
+    --
+    + _criar_entidade(dados): PasseioTuristico
+    + _atualizar_entidade(passeio, dados): void
+    + _entidade_para_dict(passeio): dict
+  }
+
+  class ControladorPassagem {
+    - _dao: DAOPassagem
+    --
+    + _criar_entidade(dados): Passagem
+    + _atualizar_entidade(passagem, dados): void
+    + _entidade_para_dict(passagem): dict
+    + confirmar_compra(): void
+  }
+
+  class ControladorPagamento {
+    - _dao: DAOPagamento
+    --
+    + _criar_entidade(dados): Pagamento
+    + _atualizar_entidade(pagamento, dados): void
+    + _entidade_para_dict(pagamento): dict
+  }
+
+  class ControladorItinerarioViagem {
+    - _dao: DAOItinerarioViagem
+    --
+    + _criar_entidade(dados): ItinerarioViagem
+    + _atualizar_entidade(itinerario, dados): void
+    + _entidade_para_dict(itinerario): dict
+    + gerenciar_passeios(): void
   }
 }
 
 package "View" <<Frame>> {
+  abstract class TelaBase {
+    --
+    + limpar_tela(): void
+    + aguardar_enter(): void
+    + mostra_mensagem(msg: str, aguardar: bool): void
+    + mostra_erro(msg: str): void
+    + mostra_sucesso(msg: str): void
+    + tela_opcoes(titulo: str, opcoes: dict): void
+    + {abstract} le_opcao(): int
+  }
+
   class TelaPessoa {
     --
-    + tela_opcoes(): int
-    + pega_dados_pessoa(): dict
-    + mostra_pessoa(dados_pessoa: dict): void
-    + seleciona_pessoa(): str
-    + mostra_mensagem(msg: str): void
+    + le_opcao(): int
+    + pega_dados_entidade(): dict
+    + mostra_entidade(dados: dict): void
+    + seleciona_entidade(): str
+  }
+
+  class TelaPais {
+    --
+    + le_opcao(): int
+    + pega_dados_entidade(): dict
+    + mostra_entidade(dados: dict): void
+    + seleciona_entidade(): str
+  }
+
+  class TelaCidade {
+    - _controlador_pais: ControladorPais
+    --
+    + set_controlador_pais(controlador): void
+    + le_opcao(): int
+    + pega_dados_entidade(): dict
+    + mostra_entidade(dados: dict): void
+    + seleciona_entidade(): str
+  }
+
+  class TelaEmpresaTransporte {
+    --
+    + le_opcao(): int
+    + pega_dados_entidade(): dict
+    + mostra_entidade(dados: dict): void
+    + seleciona_entidade(): str
+  }
+
+  class TelaMeioTransporte {
+    - _controlador_empresa: ControladorEmpresaTransporte
+    --
+    + set_controlador_empresa(controlador): void
+    + le_opcao(): int
+    + pega_dados_entidade(): dict
+    + mostra_entidade(dados: dict): void
+    + seleciona_entidade(): str
+  }
+
+  class TelaViagem {
+    --
+    + le_opcao(): int
+    + pega_dados_entidade(): dict
+    + mostra_entidade(dados: dict): void
+    + seleciona_entidade(): str
+  }
+
+  class TelaTrechoViagem {
+    - _controlador_meio_transporte: ControladorMeioTransporte
+    --
+    + set_controlador_meio_transporte(controlador): void
+    + le_opcao(): int
+    + pega_dados_entidade(): dict
+    + mostra_entidade(dados: dict): void
+    + seleciona_entidade(): str
+  }
+
+  class TelaPasseioTuristico {
+    - _controlador_cidade: ControladorCidade
+    - _controlador_pessoa: ControladorPessoa
+    --
+    + set_controlador_cidade(controlador): void
+    + set_controlador_pessoa(controlador): void
+    + le_opcao(): int
+    + pega_dados_entidade(): dict
+    + mostra_entidade(dados: dict): void
+    + seleciona_entidade(): str
+  }
+
+  class TelaPassagem {
+    - _controlador_pessoa: ControladorPessoa
+    - _controlador_trecho: ControladorTrechoViagem
+    --
+    + set_controlador_pessoa(controlador): void
+    + set_controlador_trecho(controlador): void
+    + le_opcao(): int
+    + pega_dados_entidade(): dict
+    + mostra_entidade(dados: dict): void
+    + seleciona_entidade(): str
+  }
+
+  class TelaPagamento {
+    - _controlador_pessoa: ControladorPessoa
+    - _controlador_viagem: ControladorViagem
+    --
+    + set_controlador_pessoa(controlador): void
+    + set_controlador_viagem(controlador): void
+    + le_opcao(): int
+    + pega_dados_entidade(): dict
+    + mostra_entidade(dados: dict): void
+    + seleciona_entidade(): str
+  }
+
+  class TelaItinerarioViagem {
+    - _controlador_viagem: ControladorViagem
+    - _controlador_passeio: ControladorPasseioTuristico
+    --
+    + set_controlador_viagem(controlador): void
+    + set_controlador_passeio(controlador): void
+    + le_opcao(): int
+    + pega_dados_entidade(): dict
+    + mostra_entidade(dados: dict): void
+    + seleciona_entidade(): str
+    + gerenciar_passeios(itinerario): void
+    + adicionar_passeio(itinerario): void
+    + remover_passeio(itinerario): void
+    + listar_passeios(itinerario): void
   }
 }
 
+
+package "DAO" <<Frame>> {
+  abstract class DAOBase {
+    - __arquivo: str
+    --
+    + carregar(): list[Entity]
+    + salvar(entidades: list[Entity]): void
+    + {abstract} _serializar_entidade(entidade): dict
+    + {abstract} _deserializar_entidade(dados): Entity
+  }
+
+  class DAOPessoa {
+    --
+    + _serializar_entidade(pessoa): dict
+    + _deserializar_entidade(dados): Pessoa
+  }
+
+  class DAOPais {
+    --
+    + _serializar_entidade(pais): dict
+    + _deserializar_entidade(dados): Pais
+  }
+
+  class DAOCidade {
+    --
+    + _serializar_entidade(cidade): dict
+    + _deserializar_entidade(dados): Cidade
+  }
+
+  class DAOEmpresaTransporte {
+    --
+    + _serializar_entidade(empresa): dict
+    + _deserializar_entidade(dados): EmpresaTransporte
+  }
+
+  class DAOMeioTransporte {
+    --
+    + _serializar_entidade(meio): dict
+    + _deserializar_entidade(dados): MeioTransporte
+  }
+
+  class DAOViagem {
+    --
+    + _serializar_entidade(viagem): dict
+    + _deserializar_entidade(dados): Viagem
+  }
+
+  class DAOTrechoViagem {
+    --
+    + _serializar_entidade(trecho): dict
+    + _deserializar_entidade(dados): TrechoViagem
+  }
+
+  class DAOPasseioTuristico {
+    --
+    + _serializar_entidade(passeio): dict
+    + _deserializar_entidade(dados): PasseioTuristico
+  }
+
+  class DAOPassagem {
+    --
+    + _serializar_entidade(passagem): dict
+    + _deserializar_entidade(dados): Passagem
+  }
+
+  class DAOPagamento {
+    --
+    + _serializar_entidade(pagamento): dict
+    + _deserializar_entidade(dados): Pagamento
+  }
+
+  class DAOItinerarioViagem {
+    --
+    + _serializar_entidade(itinerario): dict
+    + _deserializar_entidade(dados): ItinerarioViagem
+  }
+}
 
 package "Model" <<Frame>> {
 
@@ -304,17 +620,104 @@ package "Model" <<Frame>> {
   Passagem --> "1" Pessoa : - responsavel_compra
 }
 
+' Herança - Base Classes
+ControladorBase <|-- ControladorPessoa
+ControladorBase <|-- ControladorPais
+ControladorBase <|-- ControladorCidade
+ControladorBase <|-- ControladorEmpresaTransporte
+ControladorBase <|-- ControladorMeioTransporte
+ControladorBase <|-- ControladorViagem
+
+TelaBase <|-- TelaPessoa
+TelaBase <|-- TelaPais
+TelaBase <|-- TelaCidade
+TelaBase <|-- TelaEmpresaTransporte
+TelaBase <|-- TelaMeioTransporte
+TelaBase <|-- TelaViagem
+
+DAOBase <|-- DAOPessoa
+DAOBase <|-- DAOPais
+DAOBase <|-- DAOCidade
+DAOBase <|-- DAOEmpresaTransporte
+DAOBase <|-- DAOMeioTransporte
+DAOBase <|-- DAOViagem
+
 ' O Controlador Principal instancia e gerencia os outros controladores
 ControladorPrincipal *-- "1" ControladorPessoa
+ControladorPrincipal *-- "1" ControladorPais
+ControladorPrincipal *-- "1" ControladorCidade
+ControladorPrincipal *-- "1" ControladorEmpresaTransporte
+ControladorPrincipal *-- "1" ControladorMeioTransporte
+ControladorPrincipal *-- "1" ControladorViagem
+ControladorPrincipal *-- "1" ControladorTrechoViagem
+ControladorPrincipal *-- "1" ControladorPasseioTuristico
+ControladorPrincipal *-- "1" ControladorPassagem
+ControladorPrincipal *-- "1" ControladorPagamento
+ControladorPrincipal *-- "1" ControladorItinerarioViagem
 
-' O Controlador da Pessoa gerencia a sua Tela e a lista de Pessoas (Model)
+' Controllers usam suas respectivas Views
 ControladorPessoa *-- "1" TelaPessoa
-ControladorPessoa o-- "0..*" Pessoa
+ControladorPais *-- "1" TelaPais
+ControladorCidade *-- "1" TelaCidade
+ControladorEmpresaTransporte *-- "1" TelaEmpresaTransporte
+ControladorMeioTransporte *-- "1" TelaMeioTransporte
+ControladorViagem *-- "1" TelaViagem
+ControladorTrechoViagem *-- "1" TelaTrechoViagem
+ControladorPasseioTuristico *-- "1" TelaPasseioTuristico
+ControladorPassagem *-- "1" TelaPassagem
+ControladorPagamento *-- "1" TelaPagamento
+ControladorItinerarioViagem *-- "1" TelaItinerarioViagem
 
-' As setas pontilhadas indicam dependência/comunicação
-' A Tela notifica o Controlador sobre as ações do usuário
-TelaPessoa ..> ControladorPessoa : notifica
-' O Controlador da Pessoa pode precisar retornar ao Controlador Principal
-ControladorPessoa ..> ControladorPrincipal : retorna
+' Controllers usam seus respectivos DAOs
+ControladorPessoa *-- "1" DAOPessoa
+ControladorPais *-- "1" DAOPais
+ControladorCidade *-- "1" DAOCidade
+ControladorEmpresaTransporte *-- "1" DAOEmpresaTransporte
+ControladorMeioTransporte *-- "1" DAOMeioTransporte
+ControladorViagem *-- "1" DAOViagem
+ControladorTrechoViagem *-- "1" DAOTrechoViagem
+ControladorPasseioTuristico *-- "1" DAOPasseioTuristico
+ControladorPassagem *-- "1" DAOPassagem
+ControladorPagamento *-- "1" DAOPagamento
+ControladorItinerarioViagem *-- "1" DAOItinerarioViagem
+
+' Dependências entre Controllers
+ControladorCidade ..> ControladorPais : usa
+ControladorMeioTransporte ..> ControladorEmpresaTransporte : usa
+ControladorTrechoViagem ..> ControladorMeioTransporte : usa
+ControladorPasseioTuristico ..> ControladorCidade : usa
+ControladorPasseioTuristico ..> ControladorPessoa : usa
+ControladorPassagem ..> ControladorPessoa : usa
+ControladorPassagem ..> ControladorTrechoViagem : usa
+ControladorPagamento ..> ControladorPessoa : usa
+ControladorPagamento ..> ControladorViagem : usa
+ControladorItinerarioViagem ..> ControladorViagem : usa
+ControladorItinerarioViagem ..> ControladorPasseioTuristico : usa
+
+' Dependências entre Views e Controllers
+TelaCidade ..> ControladorPais : usa
+TelaMeioTransporte ..> ControladorEmpresaTransporte : usa
+TelaTrechoViagem ..> ControladorMeioTransporte : usa
+TelaPasseioTuristico ..> ControladorCidade : usa
+TelaPasseioTuristico ..> ControladorPessoa : usa
+TelaPassagem ..> ControladorPessoa : usa
+TelaPassagem ..> ControladorTrechoViagem : usa
+TelaPagamento ..> ControladorPessoa : usa
+TelaPagamento ..> ControladorViagem : usa
+TelaItinerarioViagem ..> ControladorViagem : usa
+TelaItinerarioViagem ..> ControladorPasseioTuristico : usa
+
+' DAOs gerenciam as entidades
+DAOPessoa o-- "0..*" Pessoa
+DAOPais o-- "0..*" Pais
+DAOCidade o-- "0..*" Cidade
+DAOEmpresaTransporte o-- "0..*" EmpresaTransporte
+DAOMeioTransporte o-- "0..*" MeioTransporte
+DAOViagem o-- "0..*" Viagem
+DAOTrechoViagem o-- "0..*" TrechoViagem
+DAOPasseioTuristico o-- "0..*" PasseioTuristico
+DAOPassagem o-- "0..*" Passagem
+DAOPagamento o-- "0..*" Pagamento
+DAOItinerarioViagem o-- "0..*" ItinerarioViagem
 
 @enduml

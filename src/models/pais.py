@@ -1,8 +1,16 @@
+import uuid
+
+
 class Pais:
 
-    def __init__(self, nome: str):
+    def __init__(self, nome: str, id: str = None):
+        self.__id = id if id else str(uuid.uuid4())
         self.__nome = nome
         self.__cidades = []
+
+    @property
+    def id(self) -> str:
+        return self.__id
 
     @property
     def nome(self) -> str:

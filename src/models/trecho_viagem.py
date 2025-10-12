@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from models.meio_transporte import MeioTransporte
 
@@ -5,7 +6,12 @@ from models.meio_transporte import MeioTransporte
 class TrechoViagem:
 
     def __init__(
-        self, data: datetime, origem: str, destino: str, transporte: MeioTransporte
+        self,
+        data: datetime,
+        origem: str,
+        destino: str,
+        transporte: MeioTransporte,
+        id: str = None,
     ):
         if not isinstance(data, datetime):
             raise TypeError("data deve ser uma instância de datetime")
@@ -16,10 +22,15 @@ class TrechoViagem:
         if not isinstance(transporte, MeioTransporte):
             raise TypeError("transporte deve ser uma instância de MeioTransporte")
 
+        self.__id = id if id else str(uuid.uuid4())
         self.__data = data
         self.__local_origem = origem
         self.__local_destino = destino
         self.__meio_transporte = transporte
+
+    @property
+    def id(self) -> str:
+        return self.__id
 
     @property
     def data(self) -> datetime:

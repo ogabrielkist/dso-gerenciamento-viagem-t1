@@ -1,6 +1,9 @@
+import uuid
+
+
 class EmpresaTransporte:
 
-    def __init__(self, nome: str, cnpj: str, telefone: str):
+    def __init__(self, nome: str, cnpj: str, telefone: str, id: str = None):
         if not isinstance(nome, str):
             raise TypeError("nome deve ser uma string")
         if not isinstance(cnpj, str):
@@ -8,9 +11,14 @@ class EmpresaTransporte:
         if not isinstance(telefone, str):
             raise TypeError("telefone deve ser uma string")
 
+        self.__id = id if id else str(uuid.uuid4())
         self.__nome = nome
         self.__cnpj = cnpj
         self.__telefone = telefone
+
+    @property
+    def id(self) -> str:
+        return self.__id
 
     @property
     def nome(self) -> str:

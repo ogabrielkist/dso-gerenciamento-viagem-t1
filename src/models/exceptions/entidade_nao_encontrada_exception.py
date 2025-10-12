@@ -1,0 +1,2 @@
+class EntidadeNaoEncontradaException(Exception):
+    pass

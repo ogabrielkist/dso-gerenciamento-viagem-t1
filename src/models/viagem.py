@@ -1,3 +1,4 @@
+import uuid
 from datetime import date
 from models.pessoa import Pessoa
 from models.cidade import Cidade
@@ -8,7 +9,13 @@ from models.passagem import Passagem
 
 class Viagem:
 
-    def __init__(self, data_inicio: date, data_fim: date, valor_total_pacote: float):
+    def __init__(
+        self,
+        data_inicio: date,
+        data_fim: date,
+        valor_total_pacote: float,
+        id: str = None,
+    ):
         if not isinstance(data_inicio, date):
             raise TypeError("data_inicio deve ser uma instância de date")
         if not isinstance(data_fim, date):
@@ -18,6 +25,7 @@ class Viagem:
         if valor_total_pacote < 0:
             raise ValueError("valor_total_pacote não pode ser negativo")
 
+        self.__id = id if id else str(uuid.uuid4())
         self.__data_inicio = data_inicio
         self.__data_fim = data_fim
         self.__valor_total_pacote = valor_total_pacote
@@ -27,6 +35,10 @@ class Viagem:
         self.__trechos = []
         self.__pagamentos_recebidos = []
         self.__passagens_compradas = []
+
+    @property
+    def id(self) -> str:
+        return self.__id
 
     @property
     def data_inicio(self) -> date:

@@ -2,128 +2,83 @@ from models import Pessoa
 from models.exceptions import (
     PessoaJaCadastradaException,
     PessoaNaoEncontradaException,
-    ListaVaziaException,
-    OpcaoInvalidaException,
+    EntidadeJaExisteException,
+    EntidadeNaoEncontradaException,
 )
 from views import TelaPessoa
+from controllers.controlador_base import ControladorBase
+from dao.dao_pessoa import DAOPessoa
 
 
-class ControladorPessoa:
+class ControladorPessoa(ControladorBase):
     def __init__(self, controlador_principal):
-        self.__controlador_principal = controlador_principal
-        self.__tela_pessoa = TelaPessoa()
-        self.__participantes = []
-
-    def incluir_pessoa(self):
-        try:
-            dados_pessoa = self.__tela_pessoa.pega_dados_pessoa()
-
-            for participante in self.__participantes:
-                if participante.identificacao() == dados_pessoa["identificacao"]:
-                    raise PessoaJaCadastradaException(
-                        "Pessoa com essa identificação já cadastrada."
-                    )
-
-            pessoa = Pessoa(
-                dados_pessoa["nome"],
-                dados_pessoa["celular"],
-                dados_pessoa["identificacao"],
-                dados_pessoa["idade"],
-            )
-
-            self.__participantes.append(pessoa)
-            self.__tela_pessoa.mostra_mensagem("Pessoa incluída com sucesso!")
-
-        except PessoaJaCadastradaException as e:
-            self.__tela_pessoa.mostra_mensagem(f"ERRO: {e}")
-
-    def listar_pessoas(self):
-        try:
-            if not self.__participantes:
-                raise ListaVaziaException("Nenhuma pessoa cadastrada.")
-
-            for pessoa in self.__participantes:
-                dados_pessoa = {
-                    "nome": pessoa.nome,
-                    "celular": pessoa.celular,
-                    "identificacao": pessoa.identificacao,
-                    "idade": pessoa.idade,
-                }
-
-                self.__tela_pessoa.mostra_pessoa(dados_pessoa)
-
-        except ListaVaziaException as e:
-            self.__tela_pessoa.mostra_mensagem(str(e))
-
-    def excluir_pessoa(self):
-        try:
-            self.listar_pessoas()
-            if not self.__participantes:
-                return
-
-            identificacao = self.__tela_pessoa.seleciona_pessoa()
-
-            pessoa_encontrada = None
-            for pessoa in self.__participantes:
-                if pessoa.identificacao == identificacao:
-                    pessoa_encontrada = pessoa
-                    break
-
-            if not pessoa_encontrada:
-                raise PessoaNaoEncontradaException("Pessoa não encontrada.")
-
-            self.__participantes.remove(pessoa_encontrada)
-            self.__tela_pessoa.mostra_mensagem("Pessoa removida com sucesso!")
-
-        except PessoaNaoEncontradaException as e:
-            self.__tela_pessoa.mostra_mensagem(f"ERRO: {e}")
-
-    def editar_pessoa(self):
-        try:
-            self.listar_pessoas()
-            if not self.__participantes:
-                return
-
-            identificacao = self.__tela_pessoa.seleciona_pessoa()
-            pessoa_encontrada = None
-            for pessoa in self.__participantes:
-                if pessoa.identificacao == identificacao:
-                    pessoa_encontrada = pessoa
-                    break
-
-            if not pessoa_encontrada:
-                raise PessoaNaoEncontradaException("Pessoa não encontrada.")
-
-            dados_pessoa = self.__tela_pessoa.pega_dados_pessoa()
-            pessoa_encontrada.nome = dados_pessoa["nome"]
-            pessoa_encontrada.celular = dados_pessoa["celular"]
-            pessoa_encontrada.identificacao = dados_pessoa["identificacao"]
-            pessoa_encontrada.idade = dados_pessoa["idade"]
-            self.__tela_pessoa.mostra_mensagem("Pessoa editada com sucesso!")
-
-        except PessoaNaoEncontradaException as e:
-            self.__tela_pessoa.mostra_mensagem(f"ERRO: {e}")
-
-    def retornar(self):
-        self.__controlador_principal.abre_tela()
-
-    def abre_tela(self):
-        lista_opcoes = {
-            1: self.incluir_pessoa,
-            2: self.listar_pessoas,
-            3: self.excluir_pessoa,
-            0: self.retornar,
+        super().__init__(controlador_principal)
+        self._tela = TelaPessoa()
+        self._dao = DAOPessoa()
+        self._entidades = self._dao.carregar()
+        self._mapa_opcoes = {
+            1: self.incluir,
+            2: self.listar,
+            3: self.excluir,
+            4: self.editar,
         }
 
-        while True:
-            try:
-                opcao_escolhida = self.__tela_pessoa.tela_opcoes()
+    def _criar_entidade(self, dados):
+        for participante in self._entidades:
+            if participante.identificacao == dados["identificacao"]:
+                raise EntidadeJaExisteException(
+                    "Pessoa com essa identificação já cadastrada."
+                )
 
-                funcao_escolhida = lista_opcoes.get(opcao_escolhida)
-                if not funcao_escolhida:
-                    raise OpcaoInvalidaException("Opção inválida!")
+        if dados["idade"] < 18:
+            raise ValueError(
+                "Pessoa deve ter mais de 18 anos para participar da viagem."
+            )
 
-                funcao_escolhida()
+        return Pessoa(
+            dados["nome"],
+            dados["celular"],
+            dados["identificacao"],
+            dados["idade"],
+        )
 
-            except OpcaoInvalidaException as e:
-                self.__tela_pessoa.mostra_mensagem(str(e))
+    def _atualizar_entidade(self, pessoa, dados):
+        if dados["idade"] < 18:
+            raise ValueError(
+                "Pessoa deve ter mais de 18 anos para participar da viagem."
+            )
+
+        pessoa.nome = dados["nome"]
+        pessoa.celular = dados["celular"]
+        pessoa.identificacao = dados["identificacao"]
+        pessoa.idade = dados["idade"]
+
+    def _entidade_para_dict(self, pessoa):
+        return {
+            "id": pessoa.id,
+            "nome": pessoa.nome,
+            "celular": pessoa.celular,
+            "identificacao": pessoa.identificacao,
+            "idade": pessoa.idade,
+        }
+
+    def incluir(self):
+        try:
+            super().incluir()
+            self._dao.salvar(self._entidades)
+        except Exception as e:
+            self._tela.mostra_erro(str(e))
+
+    def excluir(self):
+        try:
+            super().excluir()
+            self._dao.salvar(self._entidades)
+        except Exception as e:
+            self._tela.mostra_erro(str(e))
+
+    def editar(self):
+        try:
+            super().editar()
+            self._dao.salvar(self._entidades)
+        except Exception as e:
+            self._tela.mostra_erro(str(e))

@@ -1,0 +1,21 @@
+[
+  {
+    "id": "d50e8400-e29b-41d4-a716-446655440001",
+    "data": "2025-11-15",
+    "valor_pago": 500.0,
+    "pagador_id": "21b72b18-b830-4927-bd04-e6d9f233afc1",
+    "viagem_id": "eebf60ee-5ee6-4b4d-9dda-b835ae5df18a",
+    "tipo": "PagamentoPix",
+    "cpf_pagador": "123.456.789-00"
+  },
+  {
+    "id": "d50e8400-e29b-41d4-a716-446655440002",
+    "data": "2025-11-20",
+    "valor_pago": 2000.0,
+    "pagador_id": "40350d4f-e829-47ce-96f7-c77067ea08cf",
+    "viagem_id": "eebf60ee-5ee6-4b4d-9dda-b835ae5df18a",
+    "tipo": "PagamentoCartao",
+    "numero_cartao": "1234-5678-9012-3456",
+    "bandeira": "Visa"
+  }
+]
