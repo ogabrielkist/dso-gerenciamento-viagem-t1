@@ -25,5 +25,68 @@
     "valor": 30.0,
     "cidade_id": "650e8400-e29b-41d4-a716-446655440002",
     "participantes": []
+  },
+  {
+    "id": "c50e8400-e29b-41d4-a716-446655440004",
+    "atracao_turistica": "Praia de Copacabana",
+    "horario_inicio": "08:00:00",
+    "horario_fim": "11:00:00",
+    "valor": 25.0,
+    "cidade_id": "650e8400-e29b-41d4-a716-446655440003",
+    "participantes": []
+  },
+  {
+    "id": "c50e8400-e29b-41d4-a716-446655440005",
+    "atracao_turistica": "Avenida Paulista",
+    "horario_inicio": "15:00:00",
+    "horario_fim": "18:00:00",
+    "valor": 40.0,
+    "cidade_id": "650e8400-e29b-41d4-a716-446655440002",
+    "participantes": []
+  },
+  {
+    "id": "c50e8400-e29b-41d4-a716-446655440006",
+    "atracao_turistica": "Ponte Hercílio Luz",
+    "horario_inicio": "16:00:00",
+    "horario_fim": "19:00:00",
+    "valor": 35.0,
+    "cidade_id": "650e8400-e29b-41d4-a716-446655440001",
+    "participantes": []
+  },
+  {
+    "id": "c50e8400-e29b-41d4-a716-446655440007",
+    "atracao_turistica": "Praia da Joaquina",
+    "horario_inicio": "09:00:00",
+    "horario_fim": "12:00:00",
+    "valor": 20.0,
+    "cidade_id": "650e8400-e29b-41d4-a716-446655440001",
+    "participantes": []
+  },
+  {
+    "id": "c50e8400-e29b-41d4-a716-446655440008",
+    "atracao_turistica": "Casa Rosada",
+    "horario_inicio": "10:00:00",
+    "horario_fim": "13:00:00",
+    "valor": 60.0,
+    "cidade_id": "650e8400-e29b-41d4-a716-446655440004",
+    "participantes": []
+  },
+  {
+    "id": "c50e8400-e29b-41d4-a716-446655440009",
+    "atracao_turistica": "Caminito",
+    "horario_inicio": "14:00:00",
+    "horario_fim": "17:00:00",
+    "valor": 45.0,
+    "cidade_id": "650e8400-e29b-41d4-a716-446655440004",
+    "participantes": []
+  },
+  {
+    "id": "c50e8400-e29b-41d4-a716-446655440010",
+    "atracao_turistica": "Torre Costanera",
+    "horario_inicio": "11:00:00",
+    "horario_fim": "14:00:00",
+    "valor": 70.0,
+    "cidade_id": "650e8400-e29b-41d4-a716-446655440006",
+    "participantes": []
   }
 ]

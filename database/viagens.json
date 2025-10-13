@@ -4,5 +4,17 @@
     "data_inicio": "2025-12-12",
     "data_fim": "2025-12-18",
     "valor_total_pacote": 2000.0
+  },
+  {
+    "id": "febf60ee-5ee6-4b4d-9dda-b835ae5df18b",
+    "data_inicio": "2025-11-15",
+    "data_fim": "2025-11-22",
+    "valor_total_pacote": 3500.0
+  },
+  {
+    "id": "gebf60ee-5ee6-4b4d-9dda-b835ae5df18c",
+    "data_inicio": "2025-10-01",
+    "data_fim": "2025-10-08",
+    "valor_total_pacote": 1800.0
   }
 ]

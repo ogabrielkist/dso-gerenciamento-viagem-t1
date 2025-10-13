@@ -10,6 +10,7 @@ from .controlador_passeio_turistico import ControladorPasseioTuristico
 from .controlador_passagem import ControladorPassagem
 from .controlador_pagamento import ControladorPagamento
 from .controlador_itinerario_viagem import ControladorItinerarioViagem
+from .controlador_relatorio import ControladorRelatorio
 from models.exceptions import OpcaoInvalidaException
 
 
@@ -36,6 +37,7 @@ class ControladorPrincipal:
         self.__ctrl_itinerario = ControladorItinerarioViagem(
             self, self.__ctrl_viagem, self.__ctrl_passeio
         )
+        self.__ctrl_relatorio = ControladorRelatorio(self)
 
     def inicia_sistema(self):
         self.abre_tela()
@@ -74,10 +76,9 @@ class ControladorPrincipal:
         self.__ctrl_itinerario.abre_tela()
 
     def relatorios(self):
-        self.limpar_tela()
-        print("Funcionalidade de Relatórios ainda não implementada.")
-        input("\nPressione ENTER para continuar...")
-        self.limpar_tela()
+        from views.tela_relatorio import TelaRelatorio
+        tela_relatorio = TelaRelatorio(self.__ctrl_relatorio)
+        tela_relatorio.abre_tela()
 
     def encerra_sistema(self):
         exit(0)
