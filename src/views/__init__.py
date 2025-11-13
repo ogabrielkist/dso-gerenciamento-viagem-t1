@@ -10,6 +10,7 @@ from .tela_passeio_turistico import TelaPasseioTuristico
 from .tela_passagem import TelaPassagem
 from .tela_pagamento import TelaPagamento
 from .tela_itinerario_viagem import TelaItinerarioViagem
+from .tela_relatorio import TelaRelatorio
 
 __all__ = [
     "TelaBase",
@@ -24,4 +25,5 @@ __all__ = [
     "TelaPassagem",
     "TelaPagamento",
     "TelaItinerarioViagem",
+    "TelaRelatorio",
 ]

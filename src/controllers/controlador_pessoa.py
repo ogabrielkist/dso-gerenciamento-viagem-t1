@@ -6,11 +6,11 @@ from models.exceptions import (
     EntidadeNaoEncontradaException,
 )
 from views import TelaPessoa
-from controllers.controlador_base import ControladorBase
+from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_pessoa import DAOPessoa
 
 
-class ControladorPessoa(ControladorBase):
+class ControladorPessoa(ControladorEntidadeBase):
     def __init__(self, controlador_principal):
         super().__init__(controlador_principal)
         self._tela = TelaPessoa()

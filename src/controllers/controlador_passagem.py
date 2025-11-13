@@ -1,11 +1,11 @@
 from models.passagem import Passagem
 from models.exceptions import EntidadeJaExisteException, EntidadeNaoEncontradaException
 from views.tela_passagem import TelaPassagem
-from controllers.controlador_base import ControladorBase
+from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_passagem import DAOPassagem
 
 
-class ControladorPassagem(ControladorBase):
+class ControladorPassagem(ControladorEntidadeBase):
     def __init__(self, controlador_principal, controlador_pessoa, controlador_trecho):
         super().__init__(controlador_principal)
         self._tela = TelaPassagem()

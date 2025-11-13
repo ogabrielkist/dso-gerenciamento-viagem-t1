@@ -1,11 +1,11 @@
 from models.meio_transporte import MeioTransporte
 from models.exceptions import EntidadeJaExisteException, EntidadeNaoEncontradaException
 from views.tela_meio_transporte import TelaMeioTransporte
-from controllers.controlador_base import ControladorBase
+from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_meio_transporte import DAOMeioTransporte
 
 
-class ControladorMeioTransporte(ControladorBase):
+class ControladorMeioTransporte(ControladorEntidadeBase):
     def __init__(self, controlador_principal, controlador_empresa):
         super().__init__(controlador_principal)
         self._tela = TelaMeioTransporte()

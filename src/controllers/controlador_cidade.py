@@ -1,11 +1,11 @@
 from models.cidade import Cidade
 from models.exceptions import EntidadeJaExisteException, EntidadeNaoEncontradaException
 from views.tela_cidade import TelaCidade
-from controllers.controlador_base import ControladorBase
+from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_cidade import DAOCidade
 
 
-class ControladorCidade(ControladorBase):
+class ControladorCidade(ControladorEntidadeBase):
     def __init__(self, controlador_principal, controlador_pais):
         super().__init__(controlador_principal)
         self._tela = TelaCidade()

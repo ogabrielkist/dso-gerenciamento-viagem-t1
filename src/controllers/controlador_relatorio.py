@@ -1,17 +1,27 @@
 from collections import Counter
-from typing import List, Tuple
 from dao.dao_viagem import DAOViagem
 from models.exceptions import ListaVaziaException
+from views import TelaRelatorio
+from controllers.controlador_base import ControladorBase
 
 
-class ControladorRelatorio:
+class ControladorRelatorio(ControladorBase):
     def __init__(self, controlador_principal):
-        self.__controlador_principal = controlador_principal
-        self.__dao_viagem = DAOViagem()
+        super().__init__(controlador_principal)
+        self._tela = TelaRelatorio()
+        self._dao = DAOViagem()
 
-    def relatorio_destinos_mais_populares(self) -> List[Tuple[str, int]]:
+        self._mapa_opcoes = {
+            1: self.relatorio_destinos_populares,
+        }
+
+    def relatorio_destinos_populares(self):
+        """
+        Coleta os dados de viagens, processa o relatório de destinos
+        e envia os dados formatados para a tela exibir.
+        """
         try:
-            viagens = self.__dao_viagem.carregar()
+            viagens = self._dao.carregar()
 
             if not viagens:
                 raise ListaVaziaException(
@@ -33,7 +43,7 @@ class ControladorRelatorio:
                     "Não há dados suficientes para gerar o relatório de destinos populares"
                 )
 
-            return destinos_populares
+            self._tela.mostra_relatorio_destinos(destinos_populares)
 
-        except Exception as e:
-            raise Exception(f"Erro ao gerar relatório de destinos populares: {str(e)}")
+        except (ListaVaziaException, Exception) as e:
+            self._tela.mostra_erro(str(e))

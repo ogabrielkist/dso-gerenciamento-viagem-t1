@@ -1,52 +1,35 @@
-import os
-from controllers.controlador_relatorio import ControladorRelatorio
-from models.exceptions import ListaVaziaException, OpcaoInvalidaException
+from views.tela_base import TelaBase
 
 
-class TelaRelatorio:
-    def __init__(self, controlador_relatorio: ControladorRelatorio):
-        self.__controlador_relatorio = controlador_relatorio
+class TelaRelatorio(TelaBase):
+    def le_opcao(self):
+        """
+        Mostra o menu de opções de relatórios e retorna a escolha.
+        O loop principal e o "Voltar" (opção 0) são gerenciados
+        pelo ControladorBase.
+        """
+        opcoes = {1: "Destinos Mais Populares"}
 
-    def abre_tela(self):
-        lista_opcoes = {
-            1: self.relatorio_destinos_populares,
-            0: self.voltar,
-        }
+        self.tela_opcoes("RELATÓRIOS", opcoes)
 
-        while True:
-            try:
-                self.limpar_tela()
-                print("\n-------- RELATÓRIOS --------")
-                print("Escolha o tipo de relatório:")
-                print("1 - Destinos Mais Populares")
-                print("0 - Voltar")
+        try:
+            opcao = int(input("Escolha a opção: "))
+            return opcao
+        except ValueError:
+            self.mostra_erro("Opção inválida! Digite um número.")
+            return -1
 
-                opcao = int(input("Digite a opção: "))
-                funcao_escolhida = lista_opcoes.get(opcao)
-                if not funcao_escolhida:
-                    raise OpcaoInvalidaException("Opção inválida!")
+    def pega_dados_entidade(self, dados_atuais=None):
+        pass  # Não aplicável para relatórios
 
-                funcao_escolhida()
-
-            except OpcaoInvalidaException as e:
-                print(f"ERRO: {str(e)}")
-                input("\nPressione ENTER para continuar...")
-                self.limpar_tela()
-            except ValueError:
-                print("ERRO: Digite um número válido!")
-                input("\nPressione ENTER para continuar...")
-                self.limpar_tela()
-            except Exception as e:
-                print(f"ERRO: {str(e)}")
-                input("\nPressione ENTER para continuar...")
-                self.limpar_tela()
-
-    def relatorio_destinos_populares(self):
+    def mostra_relatorio_destinos(self, destinos):
+        """
+        Recebe uma lista de tuplas (destino, visitas) e a exibe
+        de forma formatada na tela.
+        """
         try:
             self.limpar_tela()
             print("\n-------- DESTINOS MAIS POPULARES --------")
-
-            destinos = self.__controlador_relatorio.relatorio_destinos_mais_populares()
 
             print(f"\n{'Posição':<8} {'Destino':<30} {'Número de Visitas':<20}")
             print("-" * 60)
@@ -56,19 +39,8 @@ class TelaRelatorio:
 
             print(f"\nTotal de destinos analisados: {len(destinos)}")
 
-        except ListaVaziaException as e:
-            print(f"AVISO: {str(e)}")
         except Exception as e:
-            print(f"ERRO: {str(e)}")
+            print(f"ERRO inesperado ao exibir relatório: {str(e)}")
 
         input("\nPressione ENTER para continuar...")
         self.limpar_tela()
-
-    def voltar(self):
-        return
-
-    def limpar_tela(self):
-        if os.name == "nt":
-            os.system("cls")
-        else:
-            os.system("clear")

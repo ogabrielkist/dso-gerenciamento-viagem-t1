@@ -76,9 +76,7 @@ class ControladorPrincipal:
         self.__ctrl_itinerario.abre_tela()
 
     def relatorios(self):
-        from views.tela_relatorio import TelaRelatorio
-        tela_relatorio = TelaRelatorio(self.__ctrl_relatorio)
-        tela_relatorio.abre_tela()
+        self.__ctrl_relatorio.abre_tela()
 
     def encerra_sistema(self):
         exit(0)

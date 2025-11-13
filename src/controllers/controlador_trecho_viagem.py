@@ -2,11 +2,11 @@ from datetime import datetime
 from models.trecho_viagem import TrechoViagem
 from models.exceptions import EntidadeJaExisteException, EntidadeNaoEncontradaException
 from views.tela_trecho_viagem import TelaTrechoViagem
-from controllers.controlador_base import ControladorBase
+from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_trecho_viagem import DAOTrechoViagem
 
 
-class ControladorTrechoViagem(ControladorBase):
+class ControladorTrechoViagem(ControladorEntidadeBase):
     def __init__(self, controlador_principal, controlador_meio_transporte):
         super().__init__(controlador_principal)
         self._tela = TelaTrechoViagem()

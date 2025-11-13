@@ -2,11 +2,11 @@ from datetime import date
 from models.pagamento import Pagamento, PagamentoDinheiro, PagamentoPix, PagamentoCartao
 from models.exceptions import EntidadeJaExisteException, EntidadeNaoEncontradaException
 from views.tela_pagamento import TelaPagamento
-from controllers.controlador_base import ControladorBase
+from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_pagamento import DAOPagamento
 
 
-class ControladorPagamento(ControladorBase):
+class ControladorPagamento(ControladorEntidadeBase):
     def __init__(self, controlador_principal, controlador_pessoa, controlador_viagem):
         super().__init__(controlador_principal)
         self._tela = TelaPagamento()
