@@ -42,6 +42,8 @@ class TelaItinerarioViagem(TelaBase):
         }
 
     def mostra_entidade(self, dados_itinerario):
+        print("--------------------")
+        print("ID:", dados_itinerario["id"])
         print("Data:", dados_itinerario["data"].strftime("%d/%m/%Y"))
         print("Passeios:", len(dados_itinerario["passeios"]))
         for i, passeio in enumerate(dados_itinerario["passeios"], 1):
@@ -51,8 +53,8 @@ class TelaItinerarioViagem(TelaBase):
         print("--------------------")
 
     def seleciona_entidade(self):
-        data_str = input("Data do itinerário (YYYY-MM-DD): ")
-        return data_str
+        id = input("ID do itinerário que deseja selecionar: ")
+        return id
 
     def gerenciar_passeios(self, itinerario):
         while True:

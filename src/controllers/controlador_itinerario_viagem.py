@@ -42,6 +42,7 @@ class ControladorItinerarioViagem(ControladorBase):
 
     def _entidade_para_dict(self, itinerario):
         return {
+            "id": itinerario.id,
             "data": itinerario.data,
             "passeios": itinerario.passeios,
         }
