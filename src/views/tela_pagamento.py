@@ -136,6 +136,7 @@ class TelaPagamento(TelaBase):
         return dados_base
 
     def mostra_entidade(self, dados_pagamento):
+        print("ID:", dados_pagamento["id"])
         print("Data:", dados_pagamento["data"].strftime("%d/%m/%Y"))
         print("Valor:", f"R$ {dados_pagamento['valor_pago']:.2f}")
         print("Pagador:", dados_pagamento["pagador"].nome)
@@ -152,7 +153,5 @@ class TelaPagamento(TelaBase):
         print("--------------------")
 
     def seleciona_entidade(self):
-        data_str = input("Data do pagamento (YYYY-MM-DD): ")
-        pagador = input("Nome do pagador: ")
-        valor = input("Valor pago: ")
-        return f"{data_str}|{pagador}|{valor}"
+        id = input("ID do pagamento que deseja selecionar: ")
+        return id

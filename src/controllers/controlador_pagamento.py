@@ -75,6 +75,7 @@ class ControladorPagamento(ControladorBase):
 
     def _entidade_para_dict(self, pagamento):
         dados = {
+            "id": pagamento.id,
             "data": pagamento.data,
             "valor_pago": pagamento.valor_pago,
             "pagador": pagamento.pagador,
