@@ -1,15 +1,19 @@
-from datetime import date
 from models.viagem import Viagem
-from models.exceptions import EntidadeJaExisteException, EntidadeNaoEncontradaException
+from models.exceptions import (
+    EntidadeJaExisteException, 
+    EntidadeNaoEncontradaException,
+    ListaVaziaException
+)
 from views.tela_viagem import TelaViagem
 from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_viagem import DAOViagem
 
 
 class ControladorViagem(ControladorEntidadeBase):
-    def __init__(self, controlador_principal):
+    def __init__(self, controlador_principal, controlador_itinerario):
         super().__init__(controlador_principal)
         self._tela = TelaViagem()
+        self._tela.set_controlador_itinerario(controlador_itinerario)
         self._dao = DAOViagem()
         self._entidades = self._dao.carregar()
         self._mapa_opcoes = {
@@ -17,6 +21,7 @@ class ControladorViagem(ControladorEntidadeBase):
             2: self.listar,
             3: self.excluir,
             4: self.editar,
+            5: self.gerenciar_itinerarios,
         }
 
     def _criar_entidade(self, dados):
@@ -68,20 +73,42 @@ class ControladorViagem(ControladorEntidadeBase):
     def incluir(self):
         try:
             super().incluir()
-            self._dao.salvar(self._entidades)
         except Exception as e:
             self._tela.mostra_erro(str(e))
 
     def excluir(self):
         try:
             super().excluir()
-            self._dao.salvar(self._entidades)
         except Exception as e:
             self._tela.mostra_erro(str(e))
 
     def editar(self):
         try:
             super().editar()
-            self._dao.salvar(self._entidades)
         except Exception as e:
             self._tela.mostra_erro(str(e))
+
+    def gerenciar_itinerarios(self):
+        """
+        Delega a lógica de gerenciamento de itinerários para a Tela.
+        """
+        try:
+            self.listar()
+            if not self._entidades:
+                return
+
+            id_viagem = self._tela.seleciona_entidade()
+            
+            viagem_encontrada = self._buscar_entidade(id_viagem) 
+
+            if not viagem_encontrada:
+                raise EntidadeNaoEncontradaException("Viagem não encontrada.")
+
+            self._tela.gerenciar_itinerarios(viagem_encontrada)
+            
+            self._dao.salvar(self._entidades)
+
+        except (EntidadeNaoEncontradaException, ListaVaziaException) as e:
+            self._tela.mostra_erro(str(e))
+        except Exception as e:
+            self._tela.mostra_erro(f"Erro ao gerenciar itinerários: {str(e)}")

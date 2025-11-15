@@ -18,24 +18,28 @@ class ControladorPrincipal:
     def __init__(self):
         self.__ctrl_pessoa = ControladorPessoa(self)
         self.__ctrl_pais = ControladorPais(self)
-        self.__ctrl_empresa = ControladorEmpresaTransporte(self)
         self.__ctrl_cidade = ControladorCidade(self, self.__ctrl_pais)
+        self.__ctrl_empresa = ControladorEmpresaTransporte(self)
         self.__ctrl_meio_transporte = ControladorMeioTransporte(
             self, self.__ctrl_empresa
         )
-        self.__ctrl_viagem = ControladorViagem(self)
-        self.__ctrl_trecho = ControladorTrechoViagem(self, self.__ctrl_meio_transporte)
+        self.__ctrl_trecho = ControladorTrechoViagem(
+            self, self.__ctrl_meio_transporte
+        )
         self.__ctrl_passeio = ControladorPasseioTuristico(
             self, self.__ctrl_cidade, self.__ctrl_pessoa
+        )
+        self.__ctrl_itinerario = ControladorItinerarioViagem(
+            self, self.__ctrl_passeio
+        )
+        self.__ctrl_viagem = ControladorViagem(
+            self, self.__ctrl_itinerario
         )
         self.__ctrl_passagem = ControladorPassagem(
             self, self.__ctrl_pessoa, self.__ctrl_trecho
         )
         self.__ctrl_pagamento = ControladorPagamento(
             self, self.__ctrl_pessoa, self.__ctrl_viagem
-        )
-        self.__ctrl_itinerario = ControladorItinerarioViagem(
-            self, self.__ctrl_viagem, self.__ctrl_passeio
         )
         self.__ctrl_relatorio = ControladorRelatorio(self)
 

@@ -78,7 +78,6 @@ class ControladorEntidadeBase(ControladorBase):
                 raise EntidadeNaoEncontradaException("Entidade não encontrada.")
 
             self._entidades.remove(entidade_encontrada)
-            # self._dao.salvar(self._entidades)
             self._tela.mostra_sucesso("Entidade removida com sucesso!")
         except ListaVaziaException as e:
             self._tela.mostra_erro(str(e))
@@ -106,7 +105,6 @@ class ControladorEntidadeBase(ControladorBase):
             dados_atuais = self._entidade_para_dict(entidade_encontrada)
             dados = self._tela.pega_dados_entidade(dados_atuais)
             self._atualizar_entidade(entidade_encontrada, dados)
-            # self._dao.salvar(self._entidades)
             self._tela.mostra_sucesso("Entidade editada com sucesso!")
         except ListaVaziaException as e:
             self._tela.mostra_erro(str(e))

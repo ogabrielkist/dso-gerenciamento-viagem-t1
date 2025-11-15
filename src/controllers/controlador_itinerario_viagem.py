@@ -7,10 +7,9 @@ from dao.dao_itinerario_viagem import DAOItinerarioViagem
 
 
 class ControladorItinerarioViagem(ControladorEntidadeBase):
-    def __init__(self, controlador_principal, controlador_viagem, controlador_passeio):
+    def __init__(self, controlador_principal, controlador_passeio):
         super().__init__(controlador_principal)
         self._tela = TelaItinerarioViagem()
-        self._tela.set_controlador_viagem(controlador_viagem)
         self._tela.set_controlador_passeio(controlador_passeio)
         self._dao = DAOItinerarioViagem()
         self._entidades = self._dao.carregar()

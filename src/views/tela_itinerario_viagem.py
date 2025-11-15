@@ -5,11 +5,7 @@ from views.tela_base import TelaBase
 class TelaItinerarioViagem(TelaBase):
     def __init__(self):
         super().__init__()
-        self._controlador_viagem = None
         self._controlador_passeio = None
-
-    def set_controlador_viagem(self, controlador_viagem):
-        self._controlador_viagem = controlador_viagem
 
     def set_controlador_passeio(self, controlador_passeio):
         self._controlador_passeio = controlador_passeio
