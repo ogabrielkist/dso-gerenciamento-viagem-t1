@@ -130,3 +130,10 @@ class ControladorEntidadeBase(ControladorBase):
             self._tela.mostra_erro(str(e))
         except Exception as e:
             self._tela.mostra_erro(f"Erro ao editar: {str(e)}")
+
+    def get_entidades(self) -> list:
+        """
+        Retorna a lista de entidades gerenciadas (ex: países, pessoas).
+        Usado por outras telas para preencher dropdowns.
+        """
+        return self._entidades
