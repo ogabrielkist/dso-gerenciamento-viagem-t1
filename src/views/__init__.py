@@ -3,7 +3,7 @@ from .tela_principal_gui import TelaPrincipalGUI
 from .tela_pais_gui import TelaPaisGUI
 from .tela_cidade_gui import TelaCidadeGUI
 from .tela_empresa_transporte_gui import TelaEmpresaTransporteGUI
-from .tela_meio_transporte import TelaMeioTransporte
+from .tela_meio_transporte_gui import TelaMeioTransporteGUI
 from .tela_viagem import TelaViagem
 from .tela_trecho_viagem import TelaTrechoViagem
 from .tela_passeio_turistico import TelaPasseioTuristico
@@ -19,7 +19,7 @@ __all__ = [
     "TelaPaisGUI",
     "TelaCidadeGUI",
     "TelaEmpresaTransporteGUI",
-    "TelaMeioTransporte",
+    "TelaMeioTransporteGUI",
     "TelaViagem",
     "TelaTrechoViagem",
     "TelaPasseioTuristico",
