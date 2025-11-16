@@ -1,16 +1,20 @@
+import FreeSimpleGUI as sg
 from abc import abstractmethod
 from controllers.controlador_base import ControladorBase
-from models.exceptions import EntidadeJaExisteException, EntidadeNaoEncontradaException, ListaVaziaException
+from models.exceptions import (
+    EntidadeJaExisteException,
+    ListaVaziaException,
+    EntidadeNaoEncontradaException,
+)
+
 
 class ControladorEntidadeBase(ControladorBase):
-    """
-    Classe base abstrata para controladores que gerenciam
-    o CRUD de uma entidade (Pessoa, Viagem, etc.)
-    """
+
     def __init__(self, controlador_principal):
         super().__init__(controlador_principal)
         self._dao = None
         self._entidades = []
+        self._tela = None
 
     @abstractmethod
     def _criar_entidade(self, dados):
@@ -34,54 +38,68 @@ class ControladorEntidadeBase(ControladorBase):
 
         return None
 
+    def abre_tela(self):
+        while True:
+            event = self._tela.le_opcao()
+            
+            if event == '-INCLUIR-':
+                self.incluir()
+            elif event == '-LISTAR-':
+                self.listar()
+            elif event == '-EDITAR-':
+                self.editar()
+            elif event == '-EXCLUIR-':
+                self.excluir()
+            elif event == '-VOLTAR-' or event == sg.WIN_CLOSED:
+                break
+
     def incluir(self):
         try:
             dados = self._tela.pega_dados_entidade()
-            entidade = self._criar_entidade(dados)
-            self._entidades.append(entidade)
-            self._dao.salvar(self._entidades)
-            self._tela.mostra_sucesso("Entidade incluída com sucesso!")
-        except EntidadeJaExisteException as e:
+            
+            if dados:
+                entidade = self._criar_entidade(dados)
+                self._entidades.append(entidade)
+                self._dao.salvar(self._entidades)
+
+                self._tela.mostra_sucesso("Entidade incluída com sucesso!")
+
+        except (EntidadeJaExisteException, ValueError) as e:
             self._tela.mostra_erro(str(e))
         except Exception as e:
-            self._tela.mostra_erro(f"Erro ao incluir: {str(e)}")
+            self._tela.mostra_erro(f"Erro inesperado ao incluir: {str(e)}")
 
     def listar(self):
         try:
             if not self._entidades:
                 raise ListaVaziaException("Nenhuma entidade cadastrada.")
 
-            self._tela.limpar_tela()
-            for entidade in self._entidades:
-                dados = self._entidade_para_dict(entidade)
-                self._tela.mostra_entidade(dados)
+            dados_lista = [self._entidade_para_dict(e) for e in self._entidades]
+            
+            self._tela.mostra_lista_entidades(dados_lista)
 
-            self._tela.aguardar_enter()
-            self._tela.limpar_tela()
         except ListaVaziaException as e:
-            self._tela.mostra_erro(str(e))
+            self._tela.mostra_mensagem("Aviso", str(e))
 
     def excluir(self):
         try:
             if not self._entidades:
                 raise ListaVaziaException("Nenhuma entidade cadastrada.")
 
-            self._tela.limpar_tela()
-            for entidade in self._entidades:
-                dados = self._entidade_para_dict(entidade)
-                self._tela.mostra_entidade(dados)
+            dados_lista = [self._entidade_para_dict(e) for e in self._entidades]
+            id_selecionado = self._tela.seleciona_entidade(dados_lista, "Excluir Entidade")
 
-            identificador = self._tela.seleciona_entidade()
-            entidade_encontrada = self._buscar_entidade(identificador)
+            if id_selecionado:
+                entidade_encontrada = self._buscar_entidade(id_selecionado)
+                
+                if not entidade_encontrada:
+                    raise EntidadeNaoEncontradaException("Entidade não encontrada.")
 
-            if not entidade_encontrada:
-                raise EntidadeNaoEncontradaException("Entidade não encontrada.")
+                self._entidades.remove(entidade_encontrada)
+                self._dao.salvar(self._entidades)
+                self._tela.mostra_sucesso("Entidade removida com sucesso!")
 
-            self._entidades.remove(entidade_encontrada)
-            self._tela.mostra_sucesso("Entidade removida com sucesso!")
-        except ListaVaziaException as e:
-            self._tela.mostra_erro(str(e))
-        except EntidadeNaoEncontradaException as e:
+        except (ListaVaziaException, EntidadeNaoEncontradaException) as e:
             self._tela.mostra_erro(str(e))
         except Exception as e:
             self._tela.mostra_erro(f"Erro ao excluir: {str(e)}")
@@ -91,24 +109,24 @@ class ControladorEntidadeBase(ControladorBase):
             if not self._entidades:
                 raise ListaVaziaException("Nenhuma entidade cadastrada.")
 
-            self._tela.limpar_tela()
-            for entidade in self._entidades:
-                dados = self._entidade_para_dict(entidade)
-                self._tela.mostra_entidade(dados)
+            dados_lista = [self._entidade_para_dict(e) for e in self._entidades]
+            id_selecionado = self._tela.seleciona_entidade(dados_lista, "Editar Entidade")
 
-            identificador = self._tela.seleciona_entidade()
-            entidade_encontrada = self._buscar_entidade(identificador)
+            if id_selecionado:
+                entidade_encontrada = self._buscar_entidade(id_selecionado)
+                
+                if not entidade_encontrada:
+                    raise EntidadeNaoEncontradaException("Entidade não encontrada.")
 
-            if not entidade_encontrada:
-                raise EntidadeNaoEncontradaException("Entidade não encontrada.")
+                dados_atuais = self._entidade_para_dict(entidade_encontrada)
+                novos_dados = self._tela.pega_dados_entidade(dados_atuais)
 
-            dados_atuais = self._entidade_para_dict(entidade_encontrada)
-            dados = self._tela.pega_dados_entidade(dados_atuais)
-            self._atualizar_entidade(entidade_encontrada, dados)
-            self._tela.mostra_sucesso("Entidade editada com sucesso!")
-        except ListaVaziaException as e:
-            self._tela.mostra_erro(str(e))
-        except EntidadeNaoEncontradaException as e:
+                if novos_dados:
+                    self._atualizar_entidade(entidade_encontrada, novos_dados)
+                    self._dao.salvar(self._entidades)
+                    self._tela.mostra_sucesso("Entidade editada com sucesso!")
+
+        except (ListaVaziaException, EntidadeNaoEncontradaException, ValueError) as e:
             self._tela.mostra_erro(str(e))
         except Exception as e:
             self._tela.mostra_erro(f"Erro ao editar: {str(e)}")
