@@ -12,7 +12,6 @@ from dao.dao_pessoa import DAOPessoa
 
 
 class ControladorPessoa(ControladorEntidadeBase):
-
     def __init__(self, controlador_principal):
         super().__init__(controlador_principal)
 

@@ -3,7 +3,6 @@ from abc import ABC
 
 
 class TelaBaseGUI(ABC):
-    
     def __init__(self):
         sg.theme('LightBrown6') 
         sg.set_options(font=('Bookman Old Style', 12))

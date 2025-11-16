@@ -1,6 +1,6 @@
 from .tela_base_gui import TelaBaseGUI
 from .tela_principal_gui import TelaPrincipalGUI
-from .tela_pais import TelaPais
+from .tela_pais_gui import TelaPaisGUI
 from .tela_cidade import TelaCidade
 from .tela_empresa_transporte import TelaEmpresaTransporte
 from .tela_meio_transporte import TelaMeioTransporte
@@ -16,7 +16,7 @@ from .tela_relatorio import TelaRelatorio
 __all__ = [
     "TelaBaseGUI",
     "TelaPrincipalGUI",
-    "TelaPais",
+    "TelaPaisGUI",
     "TelaCidade",
     "TelaEmpresaTransporte",
     "TelaMeioTransporte",
