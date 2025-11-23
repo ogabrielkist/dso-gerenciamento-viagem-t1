@@ -1,46 +1,150 @@
-from views.tela_base import TelaBase
+import FreeSimpleGUI as sg
+from views.tela_base_gui import TelaBaseGUI
 
 
-class TelaRelatorio(TelaBase):
+class TelaRelatorio(TelaBaseGUI):
     def le_opcao(self):
-        """
-        Mostra o menu de opções de relatórios e retorna a escolha.
-        O loop principal e o "Voltar" (opção 0) são gerenciados
-        pelo ControladorBase.
-        """
-        opcoes = {1: "Destinos Mais Populares"}
+        layout = [
+            [
+                sg.Text(
+                    "Relatórios",
+                    font=("Helvetica", 18, "bold"),
+                    justification="center",
+                    expand_x=True,
+                )
+            ],
+            [sg.Button("Destinos Mais Populares", key="-DESTINOS_POPULARES-", size=(30, 2))],
+            [sg.Button("Destinos Mais Caros/Baratos", key="-DESTINOS_PRECO-", size=(30, 2))],
+            [sg.Button("Passeios Mais Populares", key="-PASSEIOS_POPULARES-", size=(30, 2))],
+            [sg.Button("Passeios Mais Caros/Baratos", key="-PASSEIOS_PRECO-", size=(30, 2))],
+            [sg.VPush()],
+            [sg.Button("Voltar", key="-VOLTAR-", size=(20, 2))],
+        ]
 
-        self.tela_opcoes("RELATÓRIOS", opcoes)
+        window = sg.Window("Relatórios", layout, finalize=True)
+        event, _ = window.read()
+        window.close()
 
-        try:
-            opcao = int(input("Escolha a opção: "))
-            return opcao
-        except ValueError:
-            self.mostra_erro("Opção inválida! Digite um número.")
-            return -1
+        if event in (sg.WIN_CLOSED, "-VOLTAR-"):
+            return "-VOLTAR-"
+        return event
 
-    def pega_dados_entidade(self, dados_atuais=None):
-        pass  # Não aplicável para relatórios
+    def mostra_relatorio(self, titulo, headings, data):
+        if not data:
+            self.mostra_mensagem(titulo, "Sem dados para exibir.")
+            return
+
+        layout = [
+            [sg.Text(titulo, font=("Helvetica", 16, "bold"))],
+            [
+                sg.Table(
+                    values=data,
+                    headings=headings,
+                    auto_size_columns=True,
+                    justification="left",
+                    num_rows=min(20, len(data)),
+                    key="-TABLE-",
+                )
+            ],
+            [sg.Button("Fechar", key="-FECHAR-")],
+        ]
+
+        window = sg.Window(titulo, layout, finalize=True, resizable=True, modal=True)
+        window.read()
+        window.close()
 
     def mostra_relatorio_destinos(self, destinos):
-        """
-        Recebe uma lista de tuplas (destino, visitas) e a exibe
-        de forma formatada na tela.
-        """
-        try:
-            self.limpar_tela()
-            print("\n-------- DESTINOS MAIS POPULARES --------")
+        data = [[idx + 1, destino, visitas] for idx, (destino, visitas) in enumerate(destinos)]
+        self.mostra_relatorio(
+            "Destinos Mais Populares",
+            ["Posição", "Destino", "Visitas"],
+            data,
+        )
 
-            print(f"\n{'Posição':<8} {'Destino':<30} {'Número de Visitas':<20}")
-            print("-" * 60)
+    def mostra_relatorio_extremos(
+        self,
+        titulo,
+        headings,
+        caros,
+        baratos,
+        titulo_caros="Mais Caros",
+        titulo_baratos="Mais Baratos",
+    ):
+        def tabela_dados(dados):
+            if not dados:
+                return [[sg.Text("Sem dados para exibir.")]]
+            return [
+                [
+                    sg.Table(
+                        values=dados,
+                        headings=headings,
+                        auto_size_columns=True,
+                        justification="left",
+                        num_rows=min(10, len(dados)),
+                        key=f"-TABLE-{titulo}-{titulo_caros}-",
+                    )
+                ]
+            ]
 
-            for i, (destino, visitas) in enumerate(destinos, 1):
-                print(f"{i:<8} {destino:<30} {visitas:<20}")
+        layout = [
+            [sg.Text(titulo, font=("Helvetica", 16, "bold"))],
+            [
+                sg.Frame(
+                    titulo_caros,
+                    tabela_dados(caros),
+                    expand_x=True,
+                    pad=(5, 5),
+                ),
+                sg.Frame(
+                    titulo_baratos,
+                    tabela_dados(baratos),
+                    expand_x=True,
+                    pad=(5, 5),
+                ),
+            ],
+            [sg.Button("Fechar", key="-FECHAR-")],
+        ]
 
-            print(f"\nTotal de destinos analisados: {len(destinos)}")
+        window = sg.Window(titulo, layout, finalize=True, modal=True, resizable=True)
+        window.read()
+        window.close()
 
-        except Exception as e:
-            print(f"ERRO inesperado ao exibir relatório: {str(e)}")
+    def mostra_relatorio_destinos_preco(self, caros, baratos):
+        dados_caros = [
+            [idx + 1, cidade, pais, f"{valor:.2f}"]
+            for idx, (cidade, pais, valor) in enumerate(caros)
+        ]
+        dados_baratos = [
+            [idx + 1, cidade, pais, f"{valor:.2f}"]
+            for idx, (cidade, pais, valor) in enumerate(baratos)
+        ]
+        self.mostra_relatorio_extremos(
+            "Destinos por Valor",
+            ["Posição", "Cidade", "País", "Valor Médio (R$)"],
+            dados_caros,
+            dados_baratos,
+        )
 
-        input("\nPressione ENTER para continuar...")
-        self.limpar_tela()
+    def mostra_relatorio_passeios_populares(self, passeios):
+        data = [[idx + 1, atracao, cidade, qtd] for idx, (atracao, cidade, qtd) in enumerate(passeios)]
+        self.mostra_relatorio(
+            "Passeios Mais Populares",
+            ["Posição", "Passeio", "Cidade", "Participações"],
+            data,
+        )
+
+    def mostra_relatorio_passeios_preco(self, caros, baratos):
+        dados_caros = [
+            [idx + 1, atracao, cidade, f"{valor:.2f}"]
+            for idx, (atracao, cidade, valor) in enumerate(caros)
+        ]
+        dados_baratos = [
+            [idx + 1, atracao, cidade, f"{valor:.2f}"]
+            for idx, (atracao, cidade, valor) in enumerate(baratos)
+        ]
+        self.mostra_relatorio_extremos(
+            "Passeios por Valor",
+            ["Posição", "Passeio", "Cidade", "Valor (R$)"],
+            dados_caros,
+            dados_baratos,
+        )

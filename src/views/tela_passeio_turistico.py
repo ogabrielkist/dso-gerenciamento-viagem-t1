@@ -1,8 +1,9 @@
-from datetime import time
-from views.tela_base import TelaBase
+from datetime import datetime
+import FreeSimpleGUI as sg
+from views.tela_base_gui import TelaBaseGUI
 
 
-class TelaPasseioTuristico(TelaBase):
+class TelaPasseioTuristico(TelaBaseGUI):
     def __init__(self):
         super().__init__()
         self._controlador_cidade = None
@@ -15,95 +16,171 @@ class TelaPasseioTuristico(TelaBase):
         self._controlador_pessoa = controlador_pessoa
 
     def le_opcao(self):
-        opcoes = {1: "Incluir", 2: "Listar", 3: "Excluir", 4: "Editar"}
-        self.tela_opcoes("PASSEIOS TURÍSTICOS", opcoes)
-        opcao = int(input("Escolha a opção: "))
-        return opcao
+        layout = [
+            [
+                sg.Text(
+                    "Passeios Turísticos",
+                    font=("Helvetica", 18, "bold"),
+                    justification="center",
+                    expand_x=True,
+                )
+            ],
+            [sg.Button("Incluir", key="-INCLUIR-", size=(25, 2))],
+            [sg.Button("Listar", key="-LISTAR-", size=(25, 2))],
+            [sg.Button("Editar", key="-EDITAR-", size=(25, 2))],
+            [sg.Button("Excluir", key="-EXCLUIR-", size=(25, 2))],
+            [sg.VPush()],
+            [sg.Button("Voltar", key="-VOLTAR-", size=(25, 2))],
+        ]
+        window = sg.Window("Passeios Turísticos", layout, finalize=True)
+        event, _ = window.read()
+        window.close()
+        if event in (sg.WIN_CLOSED, "-VOLTAR-"):
+            return "-VOLTAR-"
+        return event
 
     def pega_dados_entidade(self, dados_atuais=None):
-        self.limpar_tela()
-        print("\n-------- DADOS PASSEIO TURÍSTICO --------")
+        cidades = (
+            self._controlador_cidade.get_entidades() if self._controlador_cidade else []
+        )
+        if not cidades:
+            self.mostra_erro("Cadastre uma cidade antes de criar passeios.")
+            return None
 
-        atracao_atual = dados_atuais["atracao_turistica"] if dados_atuais else ""
-        inicio_atual = (
+        mapa_cidades = {
+            f"{cidade.nome} / {cidade.pais.nome}": cidade for cidade in cidades
+        }
+        cidade_default = (
+            f"{dados_atuais['cidade'].nome} / {dados_atuais['cidade'].pais.nome}"
+            if dados_atuais
+            else next(iter(mapa_cidades.keys()))
+        )
+
+        atracao = dados_atuais["atracao_turistica"] if dados_atuais else ""
+        inicio = (
             dados_atuais["horario_inicio"].strftime("%H:%M") if dados_atuais else ""
         )
-        fim_atual = (
-            dados_atuais["horario_fim"].strftime("%H:%M") if dados_atuais else ""
-        )
-        valor_atual = dados_atuais["valor"] if dados_atuais else ""
+        fim = dados_atuais["horario_fim"].strftime("%H:%M") if dados_atuais else ""
+        valor = f"{dados_atuais['valor']:.2f}" if dados_atuais else ""
 
-        atracao = input(f"Atração turística [{atracao_atual}]: ") or atracao_atual
+        titulo = "Editar Passeio" if dados_atuais else "Novo Passeio Turístico"
+        layout = [
+            [sg.Text(titulo, font=("Helvetica", 16))],
+            [sg.Text("Atração:", size=(15, 1)), sg.Input(default_text=atracao, key="-ATRACAO-")],
+            [
+                sg.Text("Horário Início (HH:MM):", size=(15, 1)),
+                sg.Input(default_text=inicio, key="-INICIO-"),
+            ],
+            [
+                sg.Text("Horário Fim (HH:MM):", size=(15, 1)),
+                sg.Input(default_text=fim, key="-FIM-"),
+            ],
+            [
+                sg.Text("Valor (R$):", size=(15, 1)),
+                sg.Input(default_text=valor, key="-VALOR-"),
+            ],
+            [
+                sg.Text("Cidade:", size=(15, 1)),
+                sg.Combo(
+                    list(mapa_cidades.keys()),
+                    default_value=cidade_default,
+                    readonly=True,
+                    key="-CIDADE-",
+                ),
+            ],
+            [sg.Button("Salvar", key="-SALVAR-"), sg.Button("Cancelar", key="-CANCELAR-")],
+        ]
 
-        horario_inicio_str = (
-            input(f"Horário de início (HH:MM) [{inicio_atual}]: ") or inicio_atual
-        )
-        horario_inicio = time.fromisoformat(horario_inicio_str)
-
-        horario_fim_str = input(f"Horário de fim (HH:MM) [{fim_atual}]: ") or fim_atual
-        horario_fim = time.fromisoformat(horario_fim_str)
-
-        valor_input = input(f"Valor do passeio: R$ [{valor_atual}]: ") or str(
-            valor_atual
-        )
-        valor = float(valor_input)
-
-        print("\nCidades disponíveis:")
-        cidades = self._controlador_cidade._entidades
-        for i, cidade in enumerate(cidades, 1):
-            print(f"{i} - {cidade.nome} - {cidade.pais.nome}")
-
-        if not cidades:
-            raise ValueError("Nenhuma cidade cadastrada. Cadastre uma cidade primeiro.")
-
-        cidade_atual = dados_atuais["cidade"] if dados_atuais else None
-        cidade_atual_index = None
-        if cidade_atual:
-            for i, cidade in enumerate(cidades):
-                if cidade.id == cidade_atual.id:
-                    cidade_atual_index = i + 1
+        window = sg.Window(titulo, layout, finalize=True)
+        dados = None
+        while True:
+            event, values = window.read()
+            if event in (sg.WIN_CLOSED, "-CANCELAR-"):
+                break
+            if event == "-SALVAR-":
+                try:
+                    atracao = values["-ATRACAO-"].strip()
+                    if not atracao:
+                        raise ValueError("Informe a atração turística.")
+                    horario_inicio = datetime.strptime(values["-INICIO-"], "%H:%M").time()
+                    horario_fim = datetime.strptime(values["-FIM-"], "%H:%M").time()
+                    valor = float(values["-VALOR-"])
+                    dados = {
+                        "atracao_turistica": atracao,
+                        "horario_inicio": horario_inicio,
+                        "horario_fim": horario_fim,
+                        "valor": valor,
+                        "cidade": mapa_cidades[values["-CIDADE-"]],
+                    }
                     break
+                except ValueError as err:
+                    self.mostra_erro(str(err))
 
-        if cidade_atual_index:
-            print(
-                f"Cidade atual: {cidade_atual_index} - {cidade_atual.nome} - {cidade_atual.pais.nome}"
+        window.close()
+        return dados
+
+    def mostra_lista_entidades(self, dados_lista):
+        if not dados_lista:
+            self.mostra_mensagem("Passeios", "Nenhum passeio cadastrado.")
+            return
+
+        headings = ["ID", "Atração", "Horário", "Valor", "Cidade"]
+        data = [
+            [
+                d["id"],
+                d["atracao_turistica"],
+                f"{d['horario_inicio'].strftime('%H:%M')} - {d['horario_fim'].strftime('%H:%M')}",
+                f"{d['valor']:.2f}",
+                f"{d['cidade'].nome}/{d['cidade'].pais.nome}",
+            ]
+            for d in dados_lista
+        ]
+        self.mostra_lista("Passeios Turísticos", headings, data)
+
+    def seleciona_entidade(self, dados_lista, titulo_janela):
+        if not dados_lista:
+            self.mostra_erro("Nenhum passeio cadastrado.")
+            return None
+
+        headings = ["ID", "Atração", "Cidade"]
+        data = []
+        id_lookup = []
+        for d in dados_lista:
+            data.append(
+                [
+                    d["id"],
+                    d["atracao_turistica"],
+                    f"{d['cidade'].nome}/{d['cidade'].pais.nome}",
+                ]
             )
-            opcao_cidade_input = input(
-                f"Escolha a cidade (número) [{cidade_atual_index}]: "
-            ) or str(cidade_atual_index)
-        else:
-            opcao_cidade_input = input("Escolha a cidade (número): ")
+            id_lookup.append(d["id"])
 
-        opcao_cidade = int(opcao_cidade_input) - 1
-        if opcao_cidade < 0 or opcao_cidade >= len(cidades):
-            raise ValueError("Opção de cidade inválida.")
+        layout = [
+            [sg.Text(titulo_janela, font=("Helvetica", 16))],
+            [
+                sg.Table(
+                    values=data,
+                    headings=headings,
+                    auto_size_columns=True,
+                    num_rows=min(15, len(data)),
+                    select_mode=sg.TABLE_SELECT_MODE_BROWSE,
+                    key="-TABLE-",
+                )
+            ],
+            [sg.Button("Selecionar", key="-OK-"), sg.Button("Cancelar", key="-CANCELAR-")],
+        ]
 
-        cidade_selecionada = cidades[opcao_cidade]
+        window = sg.Window(titulo_janela, layout, finalize=True)
+        selecionado = None
+        while True:
+            event, values = window.read()
+            if event in (sg.WIN_CLOSED, "-CANCELAR-"):
+                break
+            if event == "-OK-":
+                if values["-TABLE-"]:
+                    selecionado = id_lookup[values["-TABLE-"][0]]
+                    break
+                self.mostra_erro("Selecione um passeio.")
 
-        return {
-            "atracao_turistica": atracao,
-            "horario_inicio": horario_inicio,
-            "horario_fim": horario_fim,
-            "valor": valor,
-            "cidade": cidade_selecionada,
-        }
-
-    def mostra_entidade(self, dados_passeio):
-        print("Atração:", dados_passeio["atracao_turistica"])
-        print(
-            "Horário:",
-            f"{dados_passeio['horario_inicio'].strftime('%H:%M')} - {dados_passeio['horario_fim'].strftime('%H:%M')}",
-        )
-        print("Valor:", f"R$ {dados_passeio['valor']:.2f}")
-        print(
-            "Cidade:",
-            f"{dados_passeio['cidade'].nome} - {dados_passeio['cidade'].pais.nome}",
-        )
-        print("Participantes:", len(dados_passeio["participantes_passeio"]))
-        print("--------------------")
-
-    def seleciona_entidade(self):
-        atracao = input("Nome da atração turística: ")
-        cidade = input("Nome da cidade: ")
-        horario = input("Horário de início (HH:MM): ")
-        return f"{atracao}|{cidade}|{horario}"
+        window.close()
+        return selecionado

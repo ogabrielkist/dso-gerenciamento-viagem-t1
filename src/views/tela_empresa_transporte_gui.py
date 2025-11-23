@@ -1,5 +1,11 @@
 import FreeSimpleGUI as sg
 from views.tela_base_gui import TelaBaseGUI
+from models.utils.validadores import (
+    formata_cnpj,
+    formata_telefone,
+    normaliza_cnpj,
+    normaliza_telefone,
+)
 
 
 class TelaEmpresaTransporteGUI(TelaBaseGUI):
@@ -34,8 +40,8 @@ class TelaEmpresaTransporteGUI(TelaBaseGUI):
 
     def pega_dados_entidade(self, dados_atuais: dict = None) -> dict | None:
         nome = dados_atuais['nome'] if dados_atuais else ''
-        cnpj = dados_atuais['cnpj'] if dados_atuais else ''
-        telefone = dados_atuais['telefone'] if dados_atuais else ''
+        cnpj = formata_cnpj(dados_atuais['cnpj']) if dados_atuais else ''
+        telefone = formata_telefone(dados_atuais['telefone']) if dados_atuais else ''
 
         titulo_janela = "Editar Empresa" if dados_atuais else "Incluir Nova Empresa"
 
@@ -64,12 +70,15 @@ class TelaEmpresaTransporteGUI(TelaBaseGUI):
                     self.mostra_erro("Todos os campos são obrigatórios.")
                     continue
 
-                dados = {
-                    "nome": values['-NOME-'],
-                    "cnpj": values['-CNPJ-'],
-                    "telefone": values['-TELEFONE-'],
-                }
-                break
+                try:
+                    dados = {
+                        "nome": values['-NOME-'],
+                        "cnpj": normaliza_cnpj(values['-CNPJ-']),
+                        "telefone": normaliza_telefone(values['-TELEFONE-']),
+                    }
+                    break
+                except ValueError as err:
+                    self.mostra_erro(str(err))
 
         window.close()
 
@@ -83,7 +92,7 @@ class TelaEmpresaTransporteGUI(TelaBaseGUI):
         headings = ["ID", "Nome", "CNPJ", "Telefone"]
 
         data = [
-            [d['id'], d['nome'], d['cnpj'], d['telefone']]
+            [d['id'], d['nome'], formata_cnpj(d['cnpj']), formata_telefone(d['telefone'])]
             for d in dados_lista
         ]
 
@@ -113,7 +122,7 @@ class TelaEmpresaTransporteGUI(TelaBaseGUI):
         id_lookup = []
 
         for d in dados_lista:
-            data.append([d['id'], d['nome'], d['cnpj'], d['telefone']])
+            data.append([d['id'], d['nome'], formata_cnpj(d['cnpj']), formata_telefone(d['telefone'])])
             id_lookup.append(d['id'])
 
         layout = [

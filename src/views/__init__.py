@@ -12,6 +12,7 @@ from .tela_passagem_gui import TelaPassagemGUI
 from .tela_pagamento import TelaPagamento
 from .tela_itinerario_viagem import TelaItinerarioViagem
 from .tela_relatorio import TelaRelatorio
+from .tela_destinos_gui import TelaDestinosGUI
 
 __all__ = [
     "TelaBaseGUI",
@@ -28,4 +29,5 @@ __all__ = [
     "TelaPagamento",
     "TelaItinerarioViagem",
     "TelaRelatorio",
+    "TelaDestinosGUI",
 ]

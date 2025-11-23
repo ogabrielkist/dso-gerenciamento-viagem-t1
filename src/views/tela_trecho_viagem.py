@@ -1,8 +1,9 @@
 from datetime import datetime
-from views.tela_base import TelaBase
+import FreeSimpleGUI as sg
+from views.tela_base_gui import TelaBaseGUI
 
 
-class TelaTrechoViagem(TelaBase):
+class TelaTrechoViagem(TelaBaseGUI):
     def __init__(self):
         super().__init__()
         self._controlador_meio_transporte = None
@@ -11,14 +12,50 @@ class TelaTrechoViagem(TelaBase):
         self._controlador_meio_transporte = controlador_meio_transporte
 
     def le_opcao(self):
-        opcoes = {1: "Incluir", 2: "Listar", 3: "Excluir", 4: "Editar"}
-        self.tela_opcoes("TRECHOS DE VIAGEM", opcoes)
-        opcao = int(input("Escolha a opção: "))
-        return opcao
+        layout = [
+            [
+                sg.Text(
+                    "Trechos de Viagem",
+                    font=("Helvetica", 18, "bold"),
+                    justification="center",
+                    expand_x=True,
+                )
+            ],
+            [sg.Button("Incluir", key="-INCLUIR-", size=(25, 2))],
+            [sg.Button("Listar", key="-LISTAR-", size=(25, 2))],
+            [sg.Button("Editar", key="-EDITAR-", size=(25, 2))],
+            [sg.Button("Excluir", key="-EXCLUIR-", size=(25, 2))],
+            [sg.VPush()],
+            [sg.Button("Voltar", key="-VOLTAR-", size=(25, 2))],
+        ]
+        window = sg.Window("Trechos de Viagem", layout, finalize=True)
+        event, _ = window.read()
+        window.close()
+        if event in (sg.WIN_CLOSED, "-VOLTAR-"):
+            return "-VOLTAR-"
+        return event
 
     def pega_dados_entidade(self, dados_atuais=None):
-        self.limpar_tela()
-        print("\n-------- DADOS TRECHO DE VIAGEM --------")
+        meios = (
+            self._controlador_meio_transporte.get_entidades()
+            if self._controlador_meio_transporte
+            else []
+        )
+        if not meios:
+            self.mostra_erro(
+                "Cadastre pelo menos um meio de transporte antes de criar trechos."
+            )
+            return None
+
+        mapa_meio = {
+            f"{meio.tipo.value} - {meio.empresa.nome}": meio for meio in meios
+        }
+        meio_default = (
+            f"{dados_atuais['meio_transporte'].tipo.value} - "
+            f"{dados_atuais['meio_transporte'].empresa.nome}"
+            if dados_atuais
+            else next(iter(mapa_meio.keys()))
+        )
 
         data_atual = (
             dados_atuais["data"].strftime("%Y-%m-%d %H:%M") if dados_atuais else ""
@@ -26,67 +63,125 @@ class TelaTrechoViagem(TelaBase):
         origem_atual = dados_atuais["local_origem"] if dados_atuais else ""
         destino_atual = dados_atuais["local_destino"] if dados_atuais else ""
 
-        data_str = (
-            input(f"Data e hora (YYYY-MM-DD HH:MM) [{data_atual}]: ") or data_atual
-        )
-        data = datetime.fromisoformat(data_str)
+        titulo = "Editar Trecho" if dados_atuais else "Novo Trecho"
+        layout = [
+            [sg.Text(titulo, font=("Helvetica", 16))],
+            [
+                sg.Text("Data e Hora (YYYY-MM-DD HH:MM):", size=(30, 1)),
+                sg.Input(default_text=data_atual, key="-DATA-"),
+            ],
+            [
+                sg.Text("Origem:", size=(30, 1)),
+                sg.Input(default_text=origem_atual, key="-ORIGEM-"),
+            ],
+            [
+                sg.Text("Destino:", size=(30, 1)),
+                sg.Input(default_text=destino_atual, key="-DESTINO-"),
+            ],
+            [
+                sg.Text("Meio de Transporte:", size=(30, 1)),
+                sg.Combo(
+                    list(mapa_meio.keys()),
+                    default_value=meio_default,
+                    readonly=True,
+                    key="-MEIO-",
+                ),
+            ],
+            [sg.Button("Salvar", key="-SALVAR-"), sg.Button("Cancelar", key="-CANCELAR-")],
+        ]
 
-        local_origem = input(f"Local de origem [{origem_atual}]: ") or origem_atual
-        local_destino = input(f"Local de destino [{destino_atual}]: ") or destino_atual
+        window = sg.Window(titulo, layout, finalize=True)
+        dados = None
+        while True:
+            event, values = window.read()
+            if event in (sg.WIN_CLOSED, "-CANCELAR-"):
+                break
+            if event == "-SALVAR-":
+                try:
+                    data = datetime.strptime(values["-DATA-"], "%Y-%m-%d %H:%M")
+                    origem = values["-ORIGEM-"].strip()
+                    destino = values["-DESTINO-"].strip()
 
-        print("\nMeios de transporte disponíveis:")
-        meios = self._controlador_meio_transporte._entidades
-        for i, meio in enumerate(meios, 1):
-            print(f"{i} - {meio.tipo.value} - {meio.empresa.nome}")
+                    if not origem or not destino:
+                        raise ValueError("Origem e destino são obrigatórios.")
 
-        if not meios:
-            raise ValueError(
-                "Nenhum meio de transporte cadastrado. Cadastre um meio de transporte primeiro."
-            )
-
-        meio_atual = dados_atuais["meio_transporte"] if dados_atuais else None
-        meio_atual_index = None
-        if meio_atual:
-            for i, meio in enumerate(meios):
-                if meio.id == meio_atual.id:
-                    meio_atual_index = i + 1
+                    meio = mapa_meio[values["-MEIO-"]]
+                    dados = {
+                        "data": data,
+                        "local_origem": origem,
+                        "local_destino": destino,
+                        "meio_transporte": meio,
+                    }
                     break
+                except ValueError as err:
+                    self.mostra_erro(str(err))
 
-        if meio_atual_index:
-            print(
-                f"Meio atual: {meio_atual_index} - {meio_atual.tipo.value} - {meio_atual.empresa.nome}"
+        window.close()
+        return dados
+
+    def mostra_lista_entidades(self, dados_lista):
+        if not dados_lista:
+            self.mostra_mensagem("Trechos", "Nenhum trecho cadastrado.")
+            return
+
+        headings = ["ID", "Data", "Origem", "Destino", "Meio"]
+        data = [
+            [
+                d["id"],
+                d["data"].strftime("%d/%m/%Y %H:%M"),
+                d["local_origem"],
+                d["local_destino"],
+                f"{d['meio_transporte'].tipo.value} - {d['meio_transporte'].empresa.nome}",
+            ]
+            for d in dados_lista
+        ]
+        self.mostra_lista("Trechos de Viagem", headings, data)
+
+    def seleciona_entidade(self, dados_lista, titulo_janela):
+        if not dados_lista:
+            self.mostra_erro("Nenhum trecho cadastrado.")
+            return None
+
+        headings = ["ID", "Data", "Origem", "Destino"]
+        data = []
+        id_lookup = []
+        for d in dados_lista:
+            data.append(
+                [
+                    d["id"],
+                    d["data"].strftime("%d/%m/%Y %H:%M"),
+                    d["local_origem"],
+                    d["local_destino"],
+                ]
             )
-            opcao_meio_input = input(
-                f"Escolha o meio de transporte (número) [{meio_atual_index}]: "
-            ) or str(meio_atual_index)
-        else:
-            opcao_meio_input = input("Escolha o meio de transporte (número): ")
+            id_lookup.append(d["id"])
 
-        opcao_meio = int(opcao_meio_input) - 1
-        if opcao_meio < 0 or opcao_meio >= len(meios):
-            raise ValueError("Opção de meio de transporte inválida.")
+        layout = [
+            [sg.Text(titulo_janela, font=("Helvetica", 16))],
+            [
+                sg.Table(
+                    values=data,
+                    headings=headings,
+                    auto_size_columns=True,
+                    num_rows=min(15, len(data)),
+                    select_mode=sg.TABLE_SELECT_MODE_BROWSE,
+                    key="-TABLE-",
+                )
+            ],
+            [sg.Button("Selecionar", key="-OK-"), sg.Button("Cancelar", key="-CANCELAR-")],
+        ]
 
-        meio_selecionado = meios[opcao_meio]
+        window = sg.Window(titulo_janela, layout, finalize=True)
+        selecionado = None
+        while True:
+            event, values = window.read()
+            if event in (sg.WIN_CLOSED, "-CANCELAR-"):
+                break
+            if event == "-OK-":
+                if values["-TABLE-"]:
+                    selecionado = id_lookup[values["-TABLE-"][0]]
+                    break
+                self.mostra_erro("Selecione um trecho.")
 
-        return {
-            "data": data,
-            "local_origem": local_origem,
-            "local_destino": local_destino,
-            "meio_transporte": meio_selecionado,
-        }
-
-    def mostra_entidade(self, dados_trecho):
-        print("Data:", dados_trecho["data"].strftime("%d/%m/%Y %H:%M"))
-        print("Origem:", dados_trecho["local_origem"])
-        print("Destino:", dados_trecho["local_destino"])
-        print(
-            "Transporte:",
-            f"{dados_trecho['meio_transporte'].tipo.value} - {dados_trecho['meio_transporte'].empresa.nome}",
-        )
-        print("--------------------")
-
-    def seleciona_entidade(self):
-        data_str = input("Data do trecho de viagem (YYYY-MM-DD HH:MM): ")
-        origem = input("Local de origem: ")
-        destino = input("Local de destino: ")
-        return f"{data_str}|{origem}|{destino}"
+        window.close()
+        return selecionado

@@ -1,8 +1,10 @@
-from datetime import date
-from views.tela_base import TelaBase
+from datetime import datetime
+import FreeSimpleGUI as sg
+from models.utils.validadores import formata_cpf, normaliza_cpf
+from views.tela_base_gui import TelaBaseGUI
 
 
-class TelaPagamento(TelaBase):
+class TelaPagamento(TelaBaseGUI):
     def __init__(self):
         super().__init__()
         self._controlador_pessoa = None
@@ -15,143 +17,255 @@ class TelaPagamento(TelaBase):
         self._controlador_viagem = controlador_viagem
 
     def le_opcao(self):
-        opcoes = {1: "Incluir", 2: "Listar", 3: "Excluir", 4: "Editar"}
-        self.tela_opcoes("PAGAMENTOS", opcoes)
-        opcao = int(input("Escolha a opção: "))
-        return opcao
+        layout = [
+            [
+                sg.Text(
+                    "Pagamentos",
+                    font=("Helvetica", 18, "bold"),
+                    justification="center",
+                    expand_x=True,
+                )
+            ],
+            [sg.Button("Incluir", key="-INCLUIR-", size=(25, 2))],
+            [sg.Button("Listar", key="-LISTAR-", size=(25, 2))],
+            [sg.Button("Editar", key="-EDITAR-", size=(25, 2))],
+            [sg.Button("Excluir", key="-EXCLUIR-", size=(25, 2))],
+            [sg.VPush()],
+            [sg.Button("Voltar", key="-VOLTAR-", size=(25, 2))],
+        ]
+        window = sg.Window("Pagamentos", layout, finalize=True)
+        event, _ = window.read()
+        window.close()
+        if event in (sg.WIN_CLOSED, "-VOLTAR-"):
+            return "-VOLTAR-"
+        return event
 
-    def pega_dados_entidade(self, dados_atuais=None):
-        self.limpar_tela()
-        print("\n-------- DADOS PAGAMENTO --------")
-
-        data_atual = dados_atuais["data"].strftime("%Y-%m-%d") if dados_atuais else ""
-        valor_atual = dados_atuais["valor_pago"] if dados_atuais else ""
-
-        data_str = (
-            input(f"Data do pagamento (YYYY-MM-DD) [{data_atual}]: ") or data_atual
+    def _combo_pessoas(self):
+        pessoas = (
+            self._controlador_pessoa.get_entidades() if self._controlador_pessoa else []
         )
-        data = date.fromisoformat(data_str)
+        return {f"{p.nome} ({p.identificacao})": p for p in pessoas}
 
-        valor_input = input(f"Valor pago: R$ [{valor_atual}]: ") or str(valor_atual)
-        valor_pago = float(valor_input)
-
-        print("\nPagadores disponíveis:")
-        pessoas = self._controlador_pessoa._entidades
-        for i, pessoa in enumerate(pessoas, 1):
-            print(f"{i} - {pessoa.nome} ({pessoa.identificacao})")
-
-        if not pessoas:
-            raise ValueError("Nenhuma pessoa cadastrada. Cadastre uma pessoa primeiro.")
-
-        pagador_atual = dados_atuais["pagador"] if dados_atuais else None
-        pagador_atual_index = None
-        if pagador_atual:
-            for i, pessoa in enumerate(pessoas):
-                if pessoa.id == pagador_atual.id:
-                    pagador_atual_index = i + 1
-                    break
-
-        if pagador_atual_index:
-            print(f"Pagador atual: {pagador_atual_index} - {pagador_atual.nome}")
-            opcao_pagador_input = input(
-                f"Escolha o pagador (número) [{pagador_atual_index}]: "
-            ) or str(pagador_atual_index)
-        else:
-            opcao_pagador_input = input("Escolha o pagador (número): ")
-
-        opcao_pagador = int(opcao_pagador_input) - 1
-        if opcao_pagador < 0 or opcao_pagador >= len(pessoas):
-            raise ValueError("Opção de pagador inválida.")
-
-        pagador_selecionado = pessoas[opcao_pagador]
-
-        print("\nViagens disponíveis:")
-        viagens = self._controlador_viagem._entidades
-        for i, viagem in enumerate(viagens, 1):
-            print(
-                f"{i} - {viagem.data_inicio.strftime('%d/%m/%Y')} a {viagem.data_fim.strftime('%d/%m/%Y')} - R$ {viagem.valor_total_pacote:.2f}"
-            )
-
-        if not viagens:
-            raise ValueError("Nenhuma viagem cadastrada. Cadastre uma viagem primeiro.")
-
-        viagem_atual = dados_atuais["viagem"] if dados_atuais else None
-        viagem_atual_index = None
-        if viagem_atual:
-            for i, viagem in enumerate(viagens):
-                if viagem.id == viagem_atual.id:
-                    viagem_atual_index = i + 1
-                    break
-
-        if viagem_atual_index:
-            print(
-                f"Viagem atual: {viagem_atual_index} - {viagem_atual.data_inicio.strftime('%d/%m/%Y')} a {viagem_atual.data_fim.strftime('%d/%m/%Y')}"
-            )
-            opcao_viagem_input = input(
-                f"Escolha a viagem (número) [{viagem_atual_index}]: "
-            ) or str(viagem_atual_index)
-        else:
-            opcao_viagem_input = input("Escolha a viagem (número): ")
-
-        opcao_viagem = int(opcao_viagem_input) - 1
-        if opcao_viagem < 0 or opcao_viagem >= len(viagens):
-            raise ValueError("Opção de viagem inválida.")
-
-        viagem_selecionada = viagens[opcao_viagem]
-
-        print("\nTipos de pagamento:")
-        print("1 - Dinheiro")
-        print("2 - PIX")
-        print("3 - Cartão de Crédito")
-
-        tipo_atual = dados_atuais.get("tipo", "") if dados_atuais else ""
-        tipo_input = (
-            input(f"Escolha o tipo de pagamento (1-3) [{tipo_atual}]: ") or tipo_atual
+    def _combo_viagens(self):
+        viagens = (
+            self._controlador_viagem.get_entidades() if self._controlador_viagem else []
         )
-
-        tipo_pagamento = int(tipo_input)
-
-        dados_base = {
-            "data": data,
-            "valor_pago": valor_pago,
-            "pagador": pagador_selecionado,
-            "viagem": viagem_selecionada,
-            "tipo": tipo_pagamento,
+        return {
+            f"{v.id[:6]} | {v.data_inicio.strftime('%d/%m/%Y')} - {v.data_fim.strftime('%d/%m/%Y')} | {v.valor_total_pacote:.2f}": v
+            for v in viagens
         }
 
-        if tipo_pagamento == 2:
-            cpf_atual = dados_atuais.get("cpf_pagador", "") if dados_atuais else ""
-            cpf = input(f"CPF do pagador [{cpf_atual}]: ") or cpf_atual
-            dados_base["cpf_pagador"] = cpf
-        elif tipo_pagamento == 3:
-            numero_atual = dados_atuais.get("numero_cartao", "") if dados_atuais else ""
-            bandeira_atual = dados_atuais.get("bandeira", "") if dados_atuais else ""
-            numero = input(f"Número do cartão [{numero_atual}]: ") or numero_atual
-            bandeira = (
-                input(f"Bandeira do cartão [{bandeira_atual}]: ") or bandeira_atual
-            )
-            dados_base["numero_cartao"] = numero
-            dados_base["bandeira"] = bandeira
+    def pega_dados_entidade(self, dados_atuais=None):
+        mapa_pessoas = self._combo_pessoas()
+        mapa_viagens = self._combo_viagens()
+        if not mapa_pessoas:
+            self.mostra_erro("Cadastre pessoas antes de registrar pagamentos.")
+            return None
+        if not mapa_viagens:
+            self.mostra_erro("Cadastre viagens antes de registrar pagamentos.")
+            return None
 
-        return dados_base
-
-    def mostra_entidade(self, dados_pagamento):
-        print("ID:", dados_pagamento["id"])
-        print("Data:", dados_pagamento["data"].strftime("%d/%m/%Y"))
-        print("Valor:", f"R$ {dados_pagamento['valor_pago']:.2f}")
-        print("Pagador:", dados_pagamento["pagador"].nome)
-        print(
-            "Viagem:",
-            f"{dados_pagamento['viagem'].data_inicio.strftime('%d/%m/%Y')} a {dados_pagamento['viagem'].data_fim.strftime('%d/%m/%Y')}",
+        pessoa_default = (
+            f"{dados_atuais['pagador'].nome} ({formata_cpf(dados_atuais['pagador'].identificacao)})"
+            if dados_atuais
+            else next(iter(mapa_pessoas.keys()))
         )
-        print("Tipo:", dados_pagamento["tipo"])
-        if "cpf_pagador" in dados_pagamento:
-            print("CPF:", dados_pagamento["cpf_pagador"])
-        if "numero_cartao" in dados_pagamento:
-            print("Cartão:", dados_pagamento["numero_cartao"])
-            print("Bandeira:", dados_pagamento["bandeira"])
-        print("--------------------")
+        viagem_default = None
+        if dados_atuais:
+            for chave, viagem in mapa_viagens.items():
+                if viagem.id == dados_atuais["viagem"].id:
+                    viagem_default = chave
+                    break
+        if viagem_default is None:
+            viagem_default = next(iter(mapa_viagens.keys()))
 
-    def seleciona_entidade(self):
-        id = input("ID do pagamento que deseja selecionar: ")
-        return id
+        data_atual = dados_atuais["data"].strftime("%Y-%m-%d") if dados_atuais else ""
+        valor_atual = f"{dados_atuais['valor_pago']:.2f}" if dados_atuais else ""
+
+        tipo_atual = 1
+        extra_pix = ""
+        extra_cartao = {"numero": "", "bandeira": ""}
+        if dados_atuais:
+            tipo_nome = dados_atuais["tipo"]
+            if tipo_nome == "PagamentoPix":
+                tipo_atual = 2
+                extra_pix = formata_cpf(dados_atuais.get("cpf_pagador", ""))
+            elif tipo_nome == "PagamentoCartao":
+                tipo_atual = 3
+                extra_cartao = {
+                    "numero": dados_atuais.get("numero_cartao", ""),
+                    "bandeira": dados_atuais.get("bandeira", ""),
+                }
+
+        titulo = "Editar Pagamento" if dados_atuais else "Novo Pagamento"
+        layout = [
+            [sg.Text(titulo, font=("Helvetica", 16))],
+            [
+                sg.Text("Data (YYYY-MM-DD):", size=(20, 1)),
+                sg.Input(default_text=data_atual, key="-DATA-"),
+            ],
+            [
+                sg.Text("Valor Pago (R$):", size=(20, 1)),
+                sg.Input(default_text=valor_atual, key="-VALOR-"),
+            ],
+            [
+                sg.Text("Pagador:", size=(20, 1)),
+                sg.Combo(
+                    list(mapa_pessoas.keys()),
+                    default_value=pessoa_default,
+                    readonly=True,
+                    key="-PESSOA-",
+                ),
+            ],
+            [
+                sg.Text("Viagem:", size=(20, 1)),
+                sg.Combo(
+                    list(mapa_viagens.keys()),
+                    default_value=viagem_default,
+                    readonly=True,
+                    key="-VIAGEM-",
+                ),
+            ],
+            [
+                sg.Text("Tipo de Pagamento:", size=(20, 1)),
+                sg.Combo(
+                    ["1 - Dinheiro", "2 - PIX", "3 - Cartão"],
+                    default_value=f"{tipo_atual} - {'Dinheiro' if tipo_atual ==1 else 'PIX' if tipo_atual==2 else 'Cartão'}",
+                    readonly=True,
+                    key="-TIPO-",
+                ),
+            ],
+            [
+                sg.Text("CPF (PIX):", size=(20, 1)),
+                sg.Input(default_text=extra_pix, key="-CPF-"),
+            ],
+            [
+                sg.Text("Número Cartão:", size=(20, 1)),
+                sg.Input(default_text=extra_cartao["numero"], key="-NUMERO-"),
+            ],
+            [
+                sg.Text("Bandeira Cartão:", size=(20, 1)),
+                sg.Input(default_text=extra_cartao["bandeira"], key="-BANDEIRA-"),
+            ],
+            [
+                sg.Button("Salvar", key="-SALVAR-"),
+                sg.Button("Cancelar", key="-CANCELAR-"),
+            ],
+        ]
+
+        window = sg.Window(titulo, layout, finalize=True)
+        dados = None
+        while True:
+            event, values = window.read()
+            if event in (sg.WIN_CLOSED, "-CANCELAR-"):
+                break
+            if event == "-SALVAR-":
+                try:
+                    data_pagto = datetime.strptime(values["-DATA-"], "%Y-%m-%d").date()
+                    valor = float(values["-VALOR-"])
+                    tipo = int(values["-TIPO-"].split(" - ")[0])
+
+                    dados = {
+                        "data": data_pagto,
+                        "valor_pago": valor,
+                        "pagador": mapa_pessoas[values["-PESSOA-"]],
+                        "viagem": mapa_viagens[values["-VIAGEM-"]],
+                        "tipo": tipo,
+                    }
+
+                    if tipo == 2:
+                        cpf_informado = values["-CPF-"].strip()
+                        if not cpf_informado:
+                            raise ValueError("Informe o CPF para pagamentos via PIX.")
+                        dados["cpf_pagador"] = normaliza_cpf(cpf_informado)
+                    elif tipo == 3:
+                        numero = values["-NUMERO-"].strip()
+                        bandeira = values["-BANDEIRA-"].strip()
+                        if not numero or not bandeira:
+                            raise ValueError("Informe número e bandeira do cartão.")
+                        dados["numero_cartao"] = numero
+                        dados["bandeira"] = bandeira
+
+                    break
+                except ValueError as err:
+                    self.mostra_erro(str(err))
+
+        window.close()
+        return dados
+
+    def mostra_lista_entidades(self, dados_lista):
+        if not dados_lista:
+            self.mostra_mensagem("Pagamentos", "Nenhum pagamento registrado.")
+            return
+
+        headings = ["ID", "Data", "Pagador", "Viagem", "Valor", "Tipo"]
+        data = []
+        for d in dados_lista:
+            viagem = (
+                f"{d['viagem'].data_inicio.strftime('%d/%m/%Y')} - "
+                f"{d['viagem'].data_fim.strftime('%d/%m/%Y')}"
+            )
+            data.append(
+                [
+                    d["id"],
+                    d["data"].strftime("%d/%m/%Y"),
+                    d["pagador"].nome,
+                    viagem,
+                    f"{d['valor_pago']:.2f}",
+                    d["tipo"].replace("Pagamento", ""),
+                ]
+            )
+
+        self.mostra_lista("Pagamentos", headings, data)
+
+    def seleciona_entidade(self, dados_lista, titulo_janela):
+        if not dados_lista:
+            self.mostra_erro("Nenhum pagamento cadastrado.")
+            return None
+
+        headings = ["ID", "Pagador", "Data", "Valor"]
+        data = []
+        id_lookup = []
+        for d in dados_lista:
+            data.append(
+                [
+                    d["id"],
+                    d["pagador"].nome,
+                    d["data"].strftime("%d/%m/%Y"),
+                    f"{d['valor_pago']:.2f}",
+                ]
+            )
+            id_lookup.append(d["id"])
+
+        layout = [
+            [sg.Text(titulo_janela, font=("Helvetica", 16))],
+            [
+                sg.Table(
+                    values=data,
+                    headings=headings,
+                    auto_size_columns=True,
+                    num_rows=min(15, len(data)),
+                    select_mode=sg.TABLE_SELECT_MODE_BROWSE,
+                    key="-TABLE-",
+                )
+            ],
+            [
+                sg.Button("Selecionar", key="-OK-"),
+                sg.Button("Cancelar", key="-CANCELAR-"),
+            ],
+        ]
+
+        window = sg.Window(titulo_janela, layout, finalize=True)
+        selecionado = None
+        while True:
+            event, values = window.read()
+            if event in (sg.WIN_CLOSED, "-CANCELAR-"):
+                break
+            if event == "-OK-":
+                if values["-TABLE-"]:
+                    selecionado = id_lookup[values["-TABLE-"][0]]
+                    break
+                self.mostra_erro("Selecione um pagamento.")
+
+        window.close()
+        return selecionado

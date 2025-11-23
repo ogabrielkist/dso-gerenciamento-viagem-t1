@@ -12,46 +12,82 @@ class TelaPrincipalGUI(TelaBaseGUI):
         Cria e exibe a janela do menu principal.
         Retorna a 'key' do botão que foi clicado.
         """
-        
-        col1 = [
-            [sg.Button("Gerenciar Pessoas", key=1, size=(30, 2))],
-            [sg.Button("Gerenciar Paises", key=2, size=(30, 2))],
-            [sg.Button("Gerenciar Cidades", key=3, size=(30, 2))],
-            [sg.Button("Gerenciar Empresas De Transporte", key=4, size=(30, 2))],
-            [sg.Button("Gerenciar Meios de Transporte", key=5, size=(30, 2))],
-            [sg.Button("Gerenciar Passagens", key=6, size=(30, 2))],
-        ]
-        col2 = [
-            [sg.Button("Gerenciar Passeios Turisticos", key=7, size=(30, 2))],
-            [sg.Button("Gerenciar Itinerários de Viagem", key=8, size=(30, 2))],
-            [sg.Button("Gerenciar Trechos de Viagem", key=9, size=(30, 2))],
-            [sg.Button("Gerenciar Viagens", key=10, size=(30, 2))],
-            [sg.Button("Gerencias Pagamentos", key=11, size=(30, 2))],
-            [sg.Button("Relatórios", key=12, size=(30, 2))],
-        ]
-        layout = [
-            [sg.Text("SISTEMA DE GERENCIAMENTO DE VIAGENS",
-                     font=('Bookman Old Style', 20, 'bold'),
-                     justification='center', 
-                     expand_x=True,
-                     pad=(10, (20, 10))
-            )],
-            [sg.Column(col1, pad=(10, 10)), 
-             sg.Column(col2, pad=(10, 10))],
-            [sg.VPush()],
-            [sg.Button("Sair", key=0, size=(20, 2), button_color=('white', 'firebrick4'))]
+
+        button_style = dict(
+            size=(30, 2),
+            pad=(5, 5),
+            button_color=("white", "#8B4513"),
+            mouseover_colors=("white", "#A0522D"),
+        )
+
+        opcoes = [
+            (1, "Gerenciar Pessoas"),
+            (2, "Gerenciar Países"),
+            (3, "Gerenciar Destinos"),
+            (4, "Gerenciar Empresas de Transporte"),
+            (5, "Gerenciar Meios de Transporte"),
+            (6, "Gerenciar Passagens"),
+            (7, "Gerenciar Trechos de Viagem"),
+            (8, "Gerenciar Passeios Turísticos"),
+            (9, "Gerenciar Pagamentos"),
+            (10, "Compras de Pacotes de Viagem"),
+            (11, "Gerenciar Itinerários de Viagem"),
+            (12, "Relatórios"),
+            (13, "Painel de Destinos"),
         ]
 
-        window = sg.Window("Menu Principal", 
-                           layout, 
-                           element_justification='center',
-                           size=(700, 500),
-                           finalize=True)
-        
+        lista_opcoes = [
+            [
+                sg.Button(
+                    f"{codigo:02d}  -  {descricao}",
+                    key=codigo,
+                    **button_style,
+                )
+            ]
+            for codigo, descricao in opcoes
+        ]
+        layout = [
+            [
+                sg.Text(
+                    "SISTEMA DE GERENCIAMENTO DE VIAGENS",
+                    font=("Bookman Old Style", 20, "bold"),
+                    justification="center",
+                    expand_x=True,
+                    pad=(10, (20, 10)),
+                )
+            ],
+            [
+                sg.Column(
+                    lista_opcoes,
+                    scrollable=True,
+                    vertical_scroll_only=True,
+                    size=(460, 360),
+                    pad=(10, 10),
+                    sbar_trough_color="#c98258",
+                    sbar_background_color="#8B4513",
+                    key="-MENU-COL-",
+                )
+            ],
+            [sg.VPush()],
+            [
+                sg.Button(
+                    "Sair", key=0, size=(20, 2), button_color=("white", "firebrick4")
+                )
+            ],
+        ]
+
+        window = sg.Window(
+            "Menu Principal",
+            layout,
+            element_justification="center",
+            size=(700, 500),
+            finalize=True,
+        )
+
         event, values = window.read()
         window.close()
-        
+
         if event == sg.WIN_CLOSED:
             return 0
-        
+
         return event
