@@ -1,5 +1,9 @@
 from models.cidade import Cidade
-from models.exceptions import EntidadeJaExisteException, EntidadeNaoEncontradaException, ListaVaziaException
+from models.exceptions import (
+    EntidadeJaExisteException,
+    EntidadeNaoEncontradaException,
+    ListaVaziaException,
+)
 from views.tela_cidade_gui import TelaCidadeGUI
 from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_cidade import DAOCidade
@@ -7,19 +11,21 @@ from dao.dao_cidade import DAOCidade
 
 class ControladorCidade(ControladorEntidadeBase):
     def __init__(self, controlador_principal, controlador_pais):
-        super().__init__(controlador_principal)        
+        super().__init__(controlador_principal)
         self._controlador_pais = controlador_pais
-        self._tela = TelaCidadeGUI() 
+        self._tela = TelaCidadeGUI("Destinos")
         self._dao = DAOCidade()
         self._entidades = self._dao.carregar()
-        
+
     def _criar_entidade(self, dados):
         for cidade in self._entidades:
             if (
                 cidade.nome.lower() == dados["nome"].lower()
                 and cidade.pais.id == dados["pais"].id
             ):
-                raise EntidadeJaExisteException("Cidade com esse nome já cadastrada neste país.")
+                raise EntidadeJaExisteException(
+                    "Cidade com esse nome já cadastrada neste país."
+                )
 
         return Cidade(dados["nome"], dados["pais"])
 
@@ -30,7 +36,9 @@ class ControladorCidade(ControladorEntidadeBase):
                 and c.nome.lower() == dados["nome"].lower()
                 and c.pais.id == dados["pais"].id
             ):
-                raise EntidadeJaExisteException("Cidade com esse nome já cadastrada neste país.")
+                raise EntidadeJaExisteException(
+                    "Cidade com esse nome já cadastrada neste país."
+                )
 
         cidade.nome = dados["nome"]
         cidade.pais = dados["pais"]
@@ -46,15 +54,15 @@ class ControladorCidade(ControladorEntidadeBase):
         try:
             lista_paises = self._controlador_pais.get_entidades()
             dados = self._tela.pega_dados_entidade(lista_paises)
-            
-            if dados: 
+
+            if dados:
                 entidade = self._criar_entidade(dados)
                 self._entidades.append(entidade)
                 self._dao.salvar(self._entidades)
                 self._tela.mostra_sucesso("Entidade incluída com sucesso!")
-        
+
         except (EntidadeJaExisteException, ValueError) as e:
-            self._tela.mostra_erro(str(e)) 
+            self._tela.mostra_erro(str(e))
         except Exception as e:
             self._tela.mostra_erro(f"Erro inesperado ao incluir: {str(e)}")
 
@@ -70,13 +78,13 @@ class ControladorCidade(ControladorEntidadeBase):
                 entidade_encontrada = self._buscar_entidade(id_selecionado)
                 if not entidade_encontrada:
                     raise EntidadeNaoEncontradaException("Entidade não encontrada.")
-                
+
                 lista_paises = self._controlador_pais.get_entidades()
                 dados_atuais = self._entidade_para_dict(entidade_encontrada)
                 novos_dados = self._tela.pega_dados_entidade(lista_paises, dados_atuais)
-                
+
                 if novos_dados:
-                    self._atualizar_entidade(entidade_encontrada, novos_dados) 
+                    self._atualizar_entidade(entidade_encontrada, novos_dados)
                     self._dao.salvar(self._entidades)
                     self._tela.mostra_sucesso("Entidade editada com sucesso!")
 

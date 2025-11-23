@@ -13,13 +13,12 @@ class ControladorItinerarioViagem(ControladorEntidadeBase):
         self._tela.set_controlador_passeio(controlador_passeio)
         self._dao = DAOItinerarioViagem()
         self._entidades = self._dao.carregar()
-        self._mapa_opcoes = {
-            1: self.incluir,
-            2: self.listar,
-            3: self.excluir,
-            4: self.editar,
-            5: self.gerenciar_passeios,
-        }
+        self._mapa_opcoes.update(
+            {
+                5: self.gerenciar_passeios,
+                "-PASSEIOS-": self.gerenciar_passeios,
+            }
+        )
 
     def _criar_entidade(self, dados):
         for itinerario in self._entidades:
@@ -73,7 +72,12 @@ class ControladorItinerarioViagem(ControladorEntidadeBase):
             if not self._entidades:
                 return
 
-            id_itinerario = self._tela.seleciona_entidade()
+            dados_lista = [self._entidade_para_dict(e) for e in self._entidades]
+            id_itinerario = self._tela.seleciona_entidade(
+                dados_lista, "Selecionar Itinerário"
+            )
+            if not id_itinerario:
+                return
             itinerario_encontrado = None
             for itinerario in self._entidades:
                 if itinerario.id == id_itinerario:

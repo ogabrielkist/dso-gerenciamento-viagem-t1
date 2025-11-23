@@ -1,6 +1,13 @@
 from datetime import date
 from models.pagamento import Pagamento, PagamentoDinheiro, PagamentoPix, PagamentoCartao
-from models.exceptions import EntidadeJaExisteException, EntidadeNaoEncontradaException
+from models.exceptions import (
+    CPFInvalidoException,
+    DadosInvalidosException,
+    EntidadeJaExisteException,
+    EntidadeNaoEncontradaException,
+    PagamentoForaPrazoException,
+)
+from models.utils.validadores import normaliza_cpf
 from views.tela_pagamento import TelaPagamento
 from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_pagamento import DAOPagamento
@@ -14,16 +21,18 @@ class ControladorPagamento(ControladorEntidadeBase):
         self._tela.set_controlador_viagem(controlador_viagem)
         self._dao = DAOPagamento()
         self._entidades = self._dao.carregar()
-        self._mapa_opcoes = {
-            1: self.incluir,
-            2: self.listar,
-            3: self.excluir,
-            4: self.editar,
-        }
+        self._mapa_opcoes.update(
+            {
+                1: self.incluir,
+                2: self.listar,
+                3: self.excluir,
+                4: self.editar,
+            }
+        )
 
     def _criar_entidade(self, dados):
         if dados["data"] > dados["viagem"].data_inicio:
-            raise ValueError(
+            raise PagamentoForaPrazoException(
                 "Pagamento não pode ser feito após a data de início da viagem."
             )
 
@@ -35,12 +44,16 @@ class ControladorPagamento(ControladorEntidadeBase):
                 dados["viagem"],
             )
         elif dados["tipo"] == 2:
+            try:
+                cpf = normaliza_cpf(dados["cpf_pagador"])
+            except ValueError as err:
+                raise CPFInvalidoException(str(err))
             return PagamentoPix(
                 dados["data"],
                 dados["valor_pago"],
                 dados["pagador"],
                 dados["viagem"],
-                dados["cpf_pagador"],
+                cpf,
             )
         elif dados["tipo"] == 3:
             return PagamentoCartao(
@@ -52,11 +65,11 @@ class ControladorPagamento(ControladorEntidadeBase):
                 dados["bandeira"],
             )
         else:
-            raise ValueError("Tipo de pagamento inválido.")
+            raise DadosInvalidosException("Tipo de pagamento inválido.")
 
     def _atualizar_entidade(self, pagamento, dados):
         if dados["data"] > dados["viagem"].data_inicio:
-            raise ValueError(
+            raise PagamentoForaPrazoException(
                 "Pagamento não pode ser feito após a data de início da viagem."
             )
 
@@ -66,7 +79,10 @@ class ControladorPagamento(ControladorEntidadeBase):
         pagamento.viagem = dados["viagem"]
 
         if isinstance(pagamento, PagamentoPix) and "cpf_pagador" in dados:
-            pagamento.cpf_pagador = dados["cpf_pagador"]
+            try:
+                pagamento.cpf_pagador = normaliza_cpf(dados["cpf_pagador"])
+            except ValueError as err:
+                raise CPFInvalidoException(str(err))
         elif isinstance(pagamento, PagamentoCartao):
             if "numero_cartao" in dados:
                 pagamento.numero_cartao = dados["numero_cartao"]

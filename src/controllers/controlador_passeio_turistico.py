@@ -13,12 +13,14 @@ class ControladorPasseioTuristico(ControladorEntidadeBase):
         self._tela.set_controlador_pessoa(controlador_pessoa)
         self._dao = DAOPasseioTuristico()
         self._entidades = self._dao.carregar()
-        self._mapa_opcoes = {
-            1: self.incluir,
-            2: self.listar,
-            3: self.excluir,
-            4: self.editar,
-        }
+        self._mapa_opcoes.update(
+            {
+                1: self.incluir,
+                2: self.listar,
+                3: self.excluir,
+                4: self.editar,
+            }
+        )
 
     def _criar_entidade(self, dados):
         for passeio in self._entidades:
@@ -59,6 +61,7 @@ class ControladorPasseioTuristico(ControladorEntidadeBase):
 
     def _entidade_para_dict(self, passeio):
         return {
+            "id": passeio.id,
             "atracao_turistica": passeio.atracao_turistica,
             "horario_inicio": passeio.horario_inicio,
             "horario_fim": passeio.horario_fim,

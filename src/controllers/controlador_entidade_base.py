@@ -15,6 +15,16 @@ class ControladorEntidadeBase(ControladorBase):
         self._dao = None
         self._entidades = []
         self._tela = None
+        self._mapa_opcoes = {
+            "-INCLUIR-": self.incluir,
+            "-LISTAR-": self.listar,
+            "-EDITAR-": self.editar,
+            "-EXCLUIR-": self.excluir,
+            1: self.incluir,
+            2: self.listar,
+            3: self.editar,
+            4: self.excluir,
+        }
 
     @abstractmethod
     def _criar_entidade(self, dados):
@@ -41,17 +51,14 @@ class ControladorEntidadeBase(ControladorBase):
     def abre_tela(self):
         while True:
             event = self._tela.le_opcao()
-            
-            if event == '-INCLUIR-':
-                self.incluir()
-            elif event == '-LISTAR-':
-                self.listar()
-            elif event == '-EDITAR-':
-                self.editar()
-            elif event == '-EXCLUIR-':
-                self.excluir()
-            elif event == '-VOLTAR-' or event == sg.WIN_CLOSED:
+
+            if event in ("-VOLTAR-", sg.WIN_CLOSED, 0):
                 break
+            handler = self._mapa_opcoes.get(event)
+            if handler:
+                handler()
+            else:
+                self._tela.mostra_erro("Opção inválida.")
 
     def incluir(self):
         try:

@@ -10,6 +10,7 @@ from .controlador_passagem import ControladorPassagem
 from .controlador_pagamento import ControladorPagamento
 from .controlador_itinerario_viagem import ControladorItinerarioViagem
 from .controlador_relatorio import ControladorRelatorio
+from .controlador_destinos import ControladorDestinos
 
 from views.tela_principal_gui import TelaPrincipalGUI
 
@@ -22,18 +23,29 @@ class ControladorPrincipal:
         self.__ctrl_pais = ControladorPais(self)
         self.__ctrl_empresa = ControladorEmpresaTransporte(self)
         self.__ctrl_cidade = ControladorCidade(self, self.__ctrl_pais)
-        self.__ctrl_meio_transporte = ControladorMeioTransporte(self, self.__ctrl_empresa)
+        self.__ctrl_meio_transporte = ControladorMeioTransporte(
+            self, self.__ctrl_empresa
+        )
         self.__ctrl_trecho = ControladorTrechoViagem(self, self.__ctrl_meio_transporte)
-        self.__ctrl_passagem = ControladorPassagem(self, self.__ctrl_pessoa, self.__ctrl_trecho)
-        self.__ctrl_passeio = ControladorPasseioTuristico(self, self.__ctrl_cidade, self.__ctrl_pessoa)
+        self.__ctrl_passagem = ControladorPassagem(
+            self, self.__ctrl_pessoa, self.__ctrl_trecho
+        )
+        self.__ctrl_passeio = ControladorPasseioTuristico(
+            self, self.__ctrl_cidade, self.__ctrl_pessoa
+        )
         self.__ctrl_itinerario = ControladorItinerarioViagem(self, self.__ctrl_passeio)
-        self.__ctrl_viagem = ControladorViagem(self, self.__ctrl_itinerario)
-        self.__ctrl_pagamento = ControladorPagamento(self, self.__ctrl_pessoa, self.__ctrl_viagem)
+        self.__ctrl_viagem = ControladorViagem(self, self.__ctrl_itinerario, self.__ctrl_pessoa)
+        self.__ctrl_pagamento = ControladorPagamento(
+            self, self.__ctrl_pessoa, self.__ctrl_viagem
+        )
         self.__ctrl_relatorio = ControladorRelatorio(self)
+        self.__ctrl_destinos = ControladorDestinos(
+            self, self.__ctrl_pais, self.__ctrl_cidade
+        )
 
     def inicia_sistema(self):
         self.abre_tela()
-    
+
     def cadastra_pessoa(self):
         self.__ctrl_pessoa.abre_tela()
 
@@ -70,10 +82,13 @@ class ControladorPrincipal:
     def relatorios(self):
         self.__ctrl_relatorio.abre_tela()
 
+    def gerenciar_destinos(self):
+        self.__ctrl_destinos.abre_tela()
+
     def encerra_sistema(self):
         exit(0)
 
-    def abre_tela(self):        
+    def abre_tela(self):
         lista_opcoes = {
             1: self.cadastra_pessoa,
             2: self.cadastra_pais,
@@ -87,6 +102,7 @@ class ControladorPrincipal:
             10: self.cadastra_viagem,
             11: self.cadastra_itinerario_viagem,
             12: self.relatorios,
+            13: self.gerenciar_destinos,
             0: self.encerra_sistema,
         }
 
@@ -95,7 +111,7 @@ class ControladorPrincipal:
             funcao_escolhida = lista_opcoes.get(opcao_escolhida)
 
             if funcao_escolhida:
-                funcao_escolhida()                
+                funcao_escolhida()
                 if opcao_escolhida == 0:
                     break
             else:
