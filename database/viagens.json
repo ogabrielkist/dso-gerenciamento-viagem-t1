@@ -16,5 +16,11 @@
     "data_inicio": "2025-10-01",
     "data_fim": "2025-10-08",
     "valor_total_pacote": 1800.0
+  },
+  {
+    "id": "206f9cb8-8507-43b7-b69d-19f820e8ab1b",
+    "data_inicio": "2025-10-10",
+    "data_fim": "2025-12-01",
+    "valor_total_pacote": 4000.0
   }
 ]
