@@ -3,7 +3,7 @@ import FreeSimpleGUI as sg
 from views.tela_base_gui import TelaBaseGUI
 
 
-class TelaItinerarioViagem(TelaBaseGUI):
+class TelaItinerarioViagemGUI(TelaBaseGUI):
     def __init__(self):
         super().__init__()
         self._controlador_passeio = None

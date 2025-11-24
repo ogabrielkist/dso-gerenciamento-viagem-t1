@@ -8,7 +8,7 @@ from models.exceptions import (
     PagamentoForaPrazoException,
 )
 from models.utils.validadores import normaliza_cpf
-from views.tela_pagamento import TelaPagamento
+from views.tela_pagamento_gui import TelaPagamentoGUI
 from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_pagamento import DAOPagamento
 
@@ -16,7 +16,7 @@ from dao.dao_pagamento import DAOPagamento
 class ControladorPagamento(ControladorEntidadeBase):
     def __init__(self, controlador_principal, controlador_pessoa, controlador_viagem):
         super().__init__(controlador_principal)
-        self._tela = TelaPagamento()
+        self._tela = TelaPagamentoGUI()
         self._tela.set_controlador_pessoa(controlador_pessoa)
         self._tela.set_controlador_viagem(controlador_viagem)
         self._dao = DAOPagamento()
@@ -67,6 +67,7 @@ class ControladorPagamento(ControladorEntidadeBase):
         else:
             raise DadosInvalidosException("Tipo de pagamento inválido.")
 
+    # TODO: Fix
     def _atualizar_entidade(self, pagamento, dados):
         if dados["data"] > dados["viagem"].data_inicio:
             raise PagamentoForaPrazoException(

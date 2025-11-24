@@ -2,7 +2,7 @@ import FreeSimpleGUI as sg
 from views.tela_base_gui import TelaBaseGUI
 
 
-class TelaRelatorio(TelaBaseGUI):
+class TelaRelatorioGUI(TelaBaseGUI):
     def le_opcao(self):
         layout = [
             [

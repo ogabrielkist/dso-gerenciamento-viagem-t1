@@ -4,7 +4,7 @@ from models.utils.validadores import formata_cpf, normaliza_cpf
 from views.tela_base_gui import TelaBaseGUI
 
 
-class TelaPagamento(TelaBaseGUI):
+class TelaPagamentoGUI(TelaBaseGUI):
     def __init__(self):
         super().__init__()
         self._controlador_pessoa = None

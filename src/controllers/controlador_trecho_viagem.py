@@ -1,6 +1,6 @@
 from models.trecho_viagem import TrechoViagem
 from models.exceptions import EntidadeJaExisteException
-from views.tela_trecho_viagem import TelaTrechoViagem
+from views.tela_trecho_viagem_gui import TelaTrechoViagemGUI
 from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_trecho_viagem import DAOTrechoViagem
 
@@ -8,7 +8,7 @@ from dao.dao_trecho_viagem import DAOTrechoViagem
 class ControladorTrechoViagem(ControladorEntidadeBase):
     def __init__(self, controlador_principal, controlador_meio_transporte):
         super().__init__(controlador_principal)
-        self._tela = TelaTrechoViagem()
+        self._tela = TelaTrechoViagemGUI()
         self._tela.set_controlador_meio_transporte(controlador_meio_transporte)
         self._dao = DAOTrechoViagem()
         self._entidades = self._dao.carregar()

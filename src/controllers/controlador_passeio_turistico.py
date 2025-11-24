@@ -1,6 +1,6 @@
 from models.passeio_turistico import PasseioTuristico
 from models.exceptions import EntidadeJaExisteException, EntidadeNaoEncontradaException
-from views.tela_passeio_turistico import TelaPasseioTuristico
+from views.tela_passeio_turistico_gui import TelaPasseioTuristicoGUI
 from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_passeio_turistico import DAOPasseioTuristico
 
@@ -8,7 +8,7 @@ from dao.dao_passeio_turistico import DAOPasseioTuristico
 class ControladorPasseioTuristico(ControladorEntidadeBase):
     def __init__(self, controlador_principal, controlador_cidade, controlador_pessoa):
         super().__init__(controlador_principal)
-        self._tela = TelaPasseioTuristico()
+        self._tela = TelaPasseioTuristicoGUI()
         self._tela.set_controlador_cidade(controlador_cidade)
         self._tela.set_controlador_pessoa(controlador_pessoa)
         self._dao = DAOPasseioTuristico()
