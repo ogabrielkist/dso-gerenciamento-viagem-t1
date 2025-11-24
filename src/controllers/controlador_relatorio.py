@@ -4,14 +4,14 @@ from dao.dao_viagem import DAOViagem
 from dao.dao_itinerario_viagem import DAOItinerarioViagem
 from dao.dao_passeio_turistico import DAOPasseioTuristico
 from models.exceptions import ListaVaziaException
-from views import TelaRelatorio
+from views import TelaRelatorioGUI
 from controllers.controlador_base import ControladorBase
 
 
 class ControladorRelatorio(ControladorBase):
     def __init__(self, controlador_principal):
         super().__init__(controlador_principal)
-        self._tela = TelaRelatorio()
+        self._tela = TelaRelatorioGUI()
         self._dao_viagem = DAOViagem()
         self._dao_itinerario = DAOItinerarioViagem()
         self._dao_passeio = DAOPasseioTuristico()

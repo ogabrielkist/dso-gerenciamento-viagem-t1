@@ -1,7 +1,7 @@
 from datetime import date
 from models.itinerario_viagem import ItinerarioViagem
 from models.exceptions import EntidadeJaExisteException, EntidadeNaoEncontradaException
-from views.tela_itinerario_viagem import TelaItinerarioViagem
+from views.tela_itinerario_viagem_gui import TelaItinerarioViagemGUI
 from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_itinerario_viagem import DAOItinerarioViagem
 
@@ -9,7 +9,7 @@ from dao.dao_itinerario_viagem import DAOItinerarioViagem
 class ControladorItinerarioViagem(ControladorEntidadeBase):
     def __init__(self, controlador_principal, controlador_passeio):
         super().__init__(controlador_principal)
-        self._tela = TelaItinerarioViagem()
+        self._tela = TelaItinerarioViagemGUI()
         self._tela.set_controlador_passeio(controlador_passeio)
         self._dao = DAOItinerarioViagem()
         self._entidades = self._dao.carregar()
