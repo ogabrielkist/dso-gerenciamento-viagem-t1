@@ -99,14 +99,25 @@ class Viagem:
     def incluir_itinerario(self, itinerario: ItinerarioViagem):
         if not isinstance(itinerario, ItinerarioViagem):
             raise TypeError("itinerario deve ser uma instância de ItinerarioViagem")
+        
         if itinerario not in self.__itinerarios:
             self.__itinerarios.append(itinerario)
+            
+            for passeio in itinerario.passeios:
+                # O método self.incluir_destino() já previne duplicatas
+                self.incluir_destino(passeio.cidade)
 
     def excluir_itinerario(self, itinerario: ItinerarioViagem):
         if not isinstance(itinerario, ItinerarioViagem):
             raise TypeError("itinerario deve ser uma instância de ItinerarioViagem")
+            
         if itinerario in self.__itinerarios:
             self.__itinerarios.remove(itinerario)
+            
+            self.__destinos_visitados = []
+            for it_restante in self.__itinerarios:
+                for passeio in it_restante.passeios:
+                    self.incluir_destino(passeio.cidade)
 
     def incluir_trecho(self, trecho: TrechoViagem):
         if not isinstance(trecho, TrechoViagem):

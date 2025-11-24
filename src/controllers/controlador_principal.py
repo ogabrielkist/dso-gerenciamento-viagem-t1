@@ -1,4 +1,3 @@
-import os
 from .controlador_pessoa import ControladorPessoa
 from .controlador_pais import ControladorPais
 from .controlador_cidade import ControladorCidade
@@ -11,11 +10,15 @@ from .controlador_passagem import ControladorPassagem
 from .controlador_pagamento import ControladorPagamento
 from .controlador_itinerario_viagem import ControladorItinerarioViagem
 from .controlador_relatorio import ControladorRelatorio
-from models.exceptions import OpcaoInvalidaException
+from .controlador_destinos import ControladorDestinos
+
+from views.tela_principal_gui import TelaPrincipalGUI
 
 
 class ControladorPrincipal:
     def __init__(self):
+        self.__tela = TelaPrincipalGUI()
+
         self.__ctrl_pessoa = ControladorPessoa(self)
         self.__ctrl_pais = ControladorPais(self)
         self.__ctrl_empresa = ControladorEmpresaTransporte(self)
@@ -23,21 +26,22 @@ class ControladorPrincipal:
         self.__ctrl_meio_transporte = ControladorMeioTransporte(
             self, self.__ctrl_empresa
         )
-        self.__ctrl_viagem = ControladorViagem(self)
         self.__ctrl_trecho = ControladorTrechoViagem(self, self.__ctrl_meio_transporte)
-        self.__ctrl_passeio = ControladorPasseioTuristico(
-            self, self.__ctrl_cidade, self.__ctrl_pessoa
-        )
         self.__ctrl_passagem = ControladorPassagem(
             self, self.__ctrl_pessoa, self.__ctrl_trecho
         )
+        self.__ctrl_passeio = ControladorPasseioTuristico(
+            self, self.__ctrl_cidade, self.__ctrl_pessoa
+        )
+        self.__ctrl_itinerario = ControladorItinerarioViagem(self, self.__ctrl_passeio)
+        self.__ctrl_viagem = ControladorViagem(self, self.__ctrl_itinerario, self.__ctrl_pessoa)
         self.__ctrl_pagamento = ControladorPagamento(
             self, self.__ctrl_pessoa, self.__ctrl_viagem
         )
-        self.__ctrl_itinerario = ControladorItinerarioViagem(
-            self, self.__ctrl_viagem, self.__ctrl_passeio
-        )
         self.__ctrl_relatorio = ControladorRelatorio(self)
+        self.__ctrl_destinos = ControladorDestinos(
+            self, self.__ctrl_pais, self.__ctrl_cidade
+        )
 
     def inicia_sistema(self):
         self.abre_tela()
@@ -76,18 +80,13 @@ class ControladorPrincipal:
         self.__ctrl_itinerario.abre_tela()
 
     def relatorios(self):
-        from views.tela_relatorio import TelaRelatorio
-        tela_relatorio = TelaRelatorio(self.__ctrl_relatorio)
-        tela_relatorio.abre_tela()
+        self.__ctrl_relatorio.abre_tela()
+
+    def gerenciar_destinos(self):
+        self.__ctrl_destinos.abre_tela()
 
     def encerra_sistema(self):
         exit(0)
-
-    def limpar_tela(self):
-        if os.name == "nt":
-            os.system("cls")
-        else:
-            os.system("clear")
 
     def abre_tela(self):
         lista_opcoes = {
@@ -96,47 +95,24 @@ class ControladorPrincipal:
             3: self.cadastra_cidade,
             4: self.cadastra_empresa_transporte,
             5: self.cadastra_meio_transporte,
-            6: self.cadastra_viagem,
+            6: self.cadastra_passagem,
             7: self.cadastra_trecho_viagem,
             8: self.cadastra_passeio_turistico,
-            9: self.cadastra_passagem,
-            10: self.cadastra_pagamento,
+            9: self.cadastra_pagamento,
+            10: self.cadastra_viagem,
             11: self.cadastra_itinerario_viagem,
             12: self.relatorios,
+            13: self.gerenciar_destinos,
             0: self.encerra_sistema,
         }
 
         while True:
-            try:
-                self.limpar_tela()
-                print("\n-------- SISTEMA DE VIAGENS --------")
-                print("Escolha sua opção")
-                print("1 - Gerenciar Pessoas")
-                print("2 - Gerenciar Países")
-                print("3 - Gerenciar Cidades")
-                print("4 - Gerenciar Empresas de Transporte")
-                print("5 - Gerenciar Meios de Transporte")
-                print("6 - Gerenciar Viagens")
-                print("7 - Gerenciar Trechos de Viagem")
-                print("8 - Gerenciar Passeios Turísticos")
-                print("9 - Gerenciar Passagens")
-                print("10 - Gerenciar Pagamentos")
-                print("11 - Gerenciar Itinerários de Viagem")
-                print("12 - Relatórios")
-                print("0 - Sair")
+            opcao_escolhida = self.__tela.mostrar_menu_principal()
+            funcao_escolhida = lista_opcoes.get(opcao_escolhida)
 
-                opcao = int(input("Digite a opção: "))
-                funcao_escolhida = lista_opcoes.get(opcao)
-                if not funcao_escolhida:
-                    raise OpcaoInvalidaException("Opção inválida!")
-
+            if funcao_escolhida:
                 funcao_escolhida()
-
-            except OpcaoInvalidaException as e:
-                print(f"ERRO: {str(e)}")
-                input("\nPressione ENTER para continuar...")
-                self.limpar_tela()
-            except Exception as e:
-                print(f"ERRO: {str(e)}")
-                input("\nPressione ENTER para continuar...")
-                self.limpar_tela()
+                if opcao_escolhida == 0:
+                    break
+            else:
+                self.__tela.mostra_erro("Opção de menu inválida. Chave não encontrada.")

@@ -1,26 +1,24 @@
 from datetime import date
 from models.itinerario_viagem import ItinerarioViagem
 from models.exceptions import EntidadeJaExisteException, EntidadeNaoEncontradaException
-from views.tela_itinerario_viagem import TelaItinerarioViagem
-from controllers.controlador_base import ControladorBase
+from views.tela_itinerario_viagem_gui import TelaItinerarioViagemGUI
+from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_itinerario_viagem import DAOItinerarioViagem
 
 
-class ControladorItinerarioViagem(ControladorBase):
-    def __init__(self, controlador_principal, controlador_viagem, controlador_passeio):
+class ControladorItinerarioViagem(ControladorEntidadeBase):
+    def __init__(self, controlador_principal, controlador_passeio):
         super().__init__(controlador_principal)
-        self._tela = TelaItinerarioViagem()
-        self._tela.set_controlador_viagem(controlador_viagem)
+        self._tela = TelaItinerarioViagemGUI()
         self._tela.set_controlador_passeio(controlador_passeio)
         self._dao = DAOItinerarioViagem()
         self._entidades = self._dao.carregar()
-        self._mapa_opcoes = {
-            1: self.incluir,
-            2: self.listar,
-            3: self.excluir,
-            4: self.editar,
-            5: self.gerenciar_passeios,
-        }
+        self._mapa_opcoes.update(
+            {
+                5: self.gerenciar_passeios,
+                "-PASSEIOS-": self.gerenciar_passeios,
+            }
+        )
 
     def _criar_entidade(self, dados):
         for itinerario in self._entidades:
@@ -42,6 +40,7 @@ class ControladorItinerarioViagem(ControladorBase):
 
     def _entidade_para_dict(self, itinerario):
         return {
+            "id": itinerario.id,
             "data": itinerario.data,
             "passeios": itinerario.passeios,
         }
@@ -73,7 +72,12 @@ class ControladorItinerarioViagem(ControladorBase):
             if not self._entidades:
                 return
 
-            id_itinerario = self._tela.seleciona_entidade()
+            dados_lista = [self._entidade_para_dict(e) for e in self._entidades]
+            id_itinerario = self._tela.seleciona_entidade(
+                dados_lista, "Selecionar Itinerário"
+            )
+            if not id_itinerario:
+                return
             itinerario_encontrado = None
             for itinerario in self._entidades:
                 if itinerario.id == id_itinerario:

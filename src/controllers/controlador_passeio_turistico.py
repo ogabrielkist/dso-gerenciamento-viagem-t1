@@ -1,24 +1,26 @@
 from models.passeio_turistico import PasseioTuristico
 from models.exceptions import EntidadeJaExisteException, EntidadeNaoEncontradaException
-from views.tela_passeio_turistico import TelaPasseioTuristico
-from controllers.controlador_base import ControladorBase
+from views.tela_passeio_turistico_gui import TelaPasseioTuristicoGUI
+from controllers.controlador_entidade_base import ControladorEntidadeBase
 from dao.dao_passeio_turistico import DAOPasseioTuristico
 
 
-class ControladorPasseioTuristico(ControladorBase):
+class ControladorPasseioTuristico(ControladorEntidadeBase):
     def __init__(self, controlador_principal, controlador_cidade, controlador_pessoa):
         super().__init__(controlador_principal)
-        self._tela = TelaPasseioTuristico()
+        self._tela = TelaPasseioTuristicoGUI()
         self._tela.set_controlador_cidade(controlador_cidade)
         self._tela.set_controlador_pessoa(controlador_pessoa)
         self._dao = DAOPasseioTuristico()
         self._entidades = self._dao.carregar()
-        self._mapa_opcoes = {
-            1: self.incluir,
-            2: self.listar,
-            3: self.excluir,
-            4: self.editar,
-        }
+        self._mapa_opcoes.update(
+            {
+                1: self.incluir,
+                2: self.listar,
+                3: self.excluir,
+                4: self.editar,
+            }
+        )
 
     def _criar_entidade(self, dados):
         for passeio in self._entidades:
@@ -59,6 +61,7 @@ class ControladorPasseioTuristico(ControladorBase):
 
     def _entidade_para_dict(self, passeio):
         return {
+            "id": passeio.id,
             "atracao_turistica": passeio.atracao_turistica,
             "horario_inicio": passeio.horario_inicio,
             "horario_fim": passeio.horario_fim,

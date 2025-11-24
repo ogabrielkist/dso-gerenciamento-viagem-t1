@@ -1,14 +1,15 @@
 from datetime import time
 from models.passeio_turistico import PasseioTuristico
-from models.cidade import Cidade
 from .dao_base import DAOBase
 from .dao_cidade import DAOCidade
+from .dao_pessoa import DAOPessoa
 
 
 class DAOPasseioTuristico(DAOBase):
     def __init__(self):
         super().__init__("passeios_turisticos.json")
         self.__dao_cidade = DAOCidade()
+        self.__dao_pessoa = DAOPessoa()
 
     def _serializar_entidade(self, passeio):
         return {
@@ -35,5 +36,14 @@ class DAOPasseioTuristico(DAOBase):
             cidade,
             dados.get("id"),
         )
+
+        participantes_ids = dados.get("participantes", [])
+        if participantes_ids:
+            pessoas = self.__dao_pessoa.carregar()
+            mapa_pessoas = {p.id: p for p in pessoas}
+            for participante_id in participantes_ids:
+                pessoa = mapa_pessoas.get(participante_id)
+                if pessoa:
+                    passeio.incluir_participante(pessoa)
 
         return passeio

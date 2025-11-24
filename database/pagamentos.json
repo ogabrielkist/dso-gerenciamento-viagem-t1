@@ -17,5 +17,13 @@
     "tipo": "PagamentoCartao",
     "numero_cartao": "1234-5678-9012-3456",
     "bandeira": "Visa"
+  },
+  {
+    "id": "605b102d-7c34-4fd2-87ae-e17ea6cd0edc",
+    "data": "2025-01-01",
+    "valor_pago": 1233.0,
+    "pagador_id": "21b72b18-b830-4927-bd04-e6d9f233afc1",
+    "viagem_id": "eebf60ee-5ee6-4b4d-9dda-b835ae5df18a",
+    "tipo": "PagamentoDinheiro"
   }
 ]

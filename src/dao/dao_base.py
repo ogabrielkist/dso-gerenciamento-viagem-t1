@@ -1,21 +1,23 @@
 import json
-import os
 from abc import ABC, abstractmethod
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+DATA_DIR = BASE_DIR / "database"
 
 
 class DAOBase(ABC):
     def __init__(self, arquivo):
-        self.__arquivo = f"database/{arquivo}"
+        self.__arquivo = DATA_DIR / arquivo
         self._criar_diretorio_se_nao_existir()
 
     def _criar_diretorio_se_nao_existir(self):
-        diretorio = os.path.dirname(self.__arquivo)
-        if not os.path.exists(diretorio):
-            os.makedirs(diretorio)
+        diretorio = self.__arquivo.parent
+        diretorio.mkdir(parents=True, exist_ok=True)
 
     def carregar(self):
         try:
-            if os.path.exists(self.__arquivo):
+            if self.__arquivo.exists():
                 with open(self.__arquivo, "r", encoding="utf-8") as arquivo:
                     dados = json.load(arquivo)
                     return [self._deserializar_entidade(item) for item in dados]
